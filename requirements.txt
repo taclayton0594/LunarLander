@@ -11,4 +11,5 @@ box2d
 box2d-py
 tensorflow
 ipykernel
+pygame
 #-e .
