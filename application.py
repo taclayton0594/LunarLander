@@ -2,6 +2,7 @@ from flask import Flask,request,render_template
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from src.components.replay_buffer import ReplayBuffer
 #from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 
 application = Flask(__name__)
@@ -13,9 +14,17 @@ app = application
 def index():
     return render_template('index.html')
 
-@app.route('/LunarRover',methods=['GET','POST'])
-def run_lunar_rover():
+#@app.route('/LunarRover',methods=['GET','POST'])
+#def run_lunar_rover():
 
 
 if __name__=="__main__":
-    app.run(host='0.0.0.0', port=8080)      
+    #app.run(host='0.0.0.0', port=8080)      
+    buf = ReplayBuffer(100,10)
+
+    for i in range(100):
+        buf.store(np.random.choice(10,(8,)))
+
+    minibatch = buf.sample()
+    print(f"minibatch[0][:]={minibatch[0][:]}")
+    print(f"minibatch[9][:]={minibatch[9][:]}")
