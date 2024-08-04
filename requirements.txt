@@ -5,4 +5,10 @@ seaborn
 matplotlib
 dill
 flask
+gym
+gym[box2d]
+box2d
+box2d-py
+tensorflow
+ipykernel
 #-e .
