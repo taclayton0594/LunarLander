@@ -12,4 +12,5 @@ box2d-py
 tensorflow
 ipykernel
 pygame
+#torch
 #-e .
