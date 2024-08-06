@@ -56,8 +56,8 @@ class DoubleQLearnerANN(nn.Module):
         
     def train(self,batch_data,epochs=1):
         batch_dataloader = DataLoader(batch_data)
-        self.ANN_relu.train()
 
+        self.ANN_relu.train()
         for _ in epochs:
             for batch, (X, y) in enumerate(batch_dataloader):
                 X, y = X.to(device), y.to(device)
