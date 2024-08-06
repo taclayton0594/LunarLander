@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from src.components.replay_buffer import ReplayBuffer
+import gym
+from src.components.create_q_learner import DoubleQLearnerANN,device
 #from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 
 application = Flask(__name__)
@@ -28,3 +30,7 @@ if __name__=="__main__":
     minibatch = buf.sample()
     print(f"minibatch[0][:]={minibatch[0][:]}")
     print(f"minibatch[9][:]={minibatch[9][:]}")
+
+    qLearner = DoubleQLearnerANN(3,np.array([32,32,32])).to(device)
+    print(qLearner)
+    print(device)
