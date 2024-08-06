@@ -1,6 +1,7 @@
+import sys
 import torch
 from torch import nn
-import sys
+from torch.utils.data import DataLoader
 from src.exception import CustomException
 from src.logger import logging
 from torch.utils.data import DataLoader

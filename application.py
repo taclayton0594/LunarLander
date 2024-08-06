@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from src.components.replay_buffer import ReplayBuffer
 import gym
-from src.components.create_q_learner import DoubleQLearnerANN,device
+from src.components.ann_model import DoubleQLearnerANN,device
 #from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 
 application = Flask(__name__)
