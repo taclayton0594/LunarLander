@@ -27,6 +27,18 @@ class LunarLander():
         self.num_actions = num_actions
         logging.info(f"New Lunar Lander object has been created.")
 
+    def __str__(self):
+        n1='\n'
+        return (
+            f'Lunar Lander object with the following parameters:{n1}'
+            f'# of states: {self.num_states}{n1}'
+            f'# of actions: {self.num_actions}{n1}'
+            f'alpha: {self.alpha}{n1}'
+            f'gamma: {self.gamma}{n1}'
+            f'eps: {self.eps}{n1}'
+            f'batch_size: {self.batch_size}{n1}'
+            )
+
     def CreateEnvironment(self,seed=222980):
         try:
             # initialize environment
@@ -54,15 +66,21 @@ class LunarLander():
         if alpha_new > self.alpha_min:
             self.alpha = alpha_new
 
+        logging.info("Alpha learning rate has been decremented.")
+
     def UpdateANNLearnRate(self):
         learn_rate_new = self.learn_rate * self.learn_rate_decay
 
         if learn_rate_new > self.alpha_min:
             self.learn_rate = learn_rate_new
 
+        logging.info("ANN learning rate has been decremented.")
+
     def UpdateEpsilon(self):
         eps_new = self.eps * self.eps_decay
 
         if eps_new > self.eps_min:
             self.eps = eps_new
+
+        logging.info("Epsilon decay factor has been decremented.")
         

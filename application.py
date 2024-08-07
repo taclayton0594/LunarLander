@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from src.components.replay_buffer import ReplayBuffer
 import gym
 from src.components.ann_model import DoubleQLearnerANN,device
+from src.components.lunar_lander import LunarLander
 #from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 
 application = Flask(__name__)
@@ -33,4 +34,6 @@ if __name__=="__main__":
 
     qLearner = DoubleQLearnerANN(3,np.array([32,32,32])).to(device)
     print(qLearner)
-    print(device)
+
+    LunarLander = LunarLander()
+    print(LunarLander)

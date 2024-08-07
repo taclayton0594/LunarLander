@@ -27,6 +27,16 @@ class DoubleQLearner():
         self.replay_buffer = ReplayBuffer(buf_size,batch_size)
         logging.info(f"Double Q-Learner has been created.")
 
+    def __str__(self):
+        n1='\n'
+        return (
+            f'Double Q-Learner with the following parameters:{n1}'
+            f'alpha = {self.alpha}{n1}'
+            f'gamma = {self.gamma}{n1}'
+            f'eps = {self.eps}{n1}'
+            f'batch_size = {self.batch_size}{n1}'
+            )
+
     def getBestAction(self,Q):
         eps_check = np.random.random()
             
