@@ -45,9 +45,12 @@ class LunarLander():
             )
     
     def CreateQLearner(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss):
-        self.DoubleQLearner = DoubleQLearner(num_layers,neurons,num_inputs,loss,self.learn_rate,
-                            self.num_actions,self.buf_size,self.batch_size,self.alpha,self.gamma,self.eps)
-        
+        try:
+            self.DoubleQLearner = DoubleQLearner(num_layers,neurons,num_inputs,loss,self.learn_rate,
+                                self.num_actions,self.buf_size,self.batch_size,self.alpha,self.gamma,self.eps)
+        except Exception as e:
+            raise CustomException(e,sys)
+
         return self.DoubleQLearner
 
     def CreateEnvironment(self,seed=222980):

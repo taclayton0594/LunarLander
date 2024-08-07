@@ -69,19 +69,23 @@ class DoubleQLearnerANN(nn.Module):
         return self.ANN_relu(x)
         
     def train(self,batch_data,epochs=1):
-        batch_dataloader = DataLoader(batch_data)
+        try:
+            batch_dataloader = DataLoader(batch_data)
 
-        self.ANN_relu.train()
-        for _ in epochs:
-            for batch, (X, y) in enumerate(batch_dataloader):
-                X, y = X.to(device), y.to(device)
+            self.ANN_relu.train()
+            for _ in epochs:
+                for batch, (X, y) in enumerate(batch_dataloader):
+                    X, y = X.to(device), y.to(device)
 
-                # Compute prediction error
-                pred = self.ANN_relu(X)
-                loss = self.loss_fcn(pred, y)
+                    # Compute prediction error
+                    pred = self.ANN_relu(X)
+                    loss = self.loss_fcn(pred, y)
 
-                # Backpropagation
-                loss.backward()
-                self.optimizer.step()
-                self.optimizer.zero_grad()
+                    # Backpropagation
+                    loss.backward()
+                    self.optimizer.step()
+                    self.optimizer.zero_grad()
+
+        except Exception as e:
+            raise CustomException(e,sys)
 
