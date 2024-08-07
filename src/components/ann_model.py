@@ -28,6 +28,7 @@ class DoubleQLearnerANN(nn.Module):
         self.neurons = neurons
         self.num_outputs = num_outputs
         self.loss_fcn = loss
+        self.learn_rate = learn_rate
         try:
             # Create model structure and add input layer
             layers = []
@@ -52,6 +53,18 @@ class DoubleQLearnerANN(nn.Module):
         self.optimizer = torch.optim.Adam(self.ANN_relu.parameters(),lr=learn_rate)
         logging.info(f"Neural network initialized.")
         
+    def __str__(self):
+        n1='\n'
+        return (
+            f'ANN for Q-Learner with the following parameters:{n1}'
+            f'# of layers = {self.num_layers}{n1}'
+            f'# of neurons = {self.neurons}{n1}'
+            f'# of inputs = {self.num_inputs}{n1}'
+            f'# of outputs = {self.num_outputs}{n1}'
+            f'loss function = {self.loss_fcn}{n1}'
+            f'learn_rate = {self.learn_rate}{n1}'
+            )
+    
     def forward(self,x):
         return self.ANN_relu(x)
         

@@ -25,6 +25,11 @@ class LunarLander():
         self.eps_min = eps_min        
         self.num_states = num_states
         self.num_actions = num_actions
+        self.reward = 0
+        self.step_count = 0
+        self.env = np.empty(dtype=object)
+        self.curr_state = np.zeros((num_states,))
+        self.DoubleQLearner = np.empty(dtype=object)
         logging.info(f"New Lunar Lander object has been created.")
 
     def __str__(self):
@@ -38,27 +43,37 @@ class LunarLander():
             f'eps: {self.eps}{n1}'
             f'batch_size: {self.batch_size}{n1}'
             )
-
-    def CreateEnvironment(self,seed=222980):
-        try:
-            # initialize environment
-            env = gym.make('LunarLander-v2',render_mode="human")
-            env.action_space.seed(seed)
-
-            # get info on environment and seed
-            state, _ = env.reset(seed=seed, options={})
-
-            logging.info(f"Lunar Lander environment has been created.")
-
-            return env, state
-        except Exception as e:
-            raise CustomException(e,sys)
-
+    
     def CreateQLearner(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss):
         self.DoubleQLearner = DoubleQLearner(num_layers,neurons,num_inputs,loss,self.learn_rate,
                             self.num_actions,self.buf_size,self.batch_size,self.alpha,self.gamma,self.eps)
         
         return self.DoubleQLearner
+
+    def CreateEnvironment(self,seed=222980):
+        try:
+            # initialize environment
+            self.env = gym.make('LunarLander-v2',render_mode="human")
+            self.env.action_space.seed(seed)
+
+            # get info on environment and seed
+            self.curr_state, _ = self.env.reset(seed=seed, options={})
+
+            logging.info(f"Lunar Lander environment has been created.")
+
+        except Exception as e:
+            raise CustomException(e,sys)
+        
+    def EnvironmentStep(self,action):
+        next_state, reward, terminated, truncated, _ = self.env.step(action)
+        done = terminated or truncated
+
+        # Store new experience
+        experience = self.curr_state, next_state, action, reward, done
+        self.DoubleQLearner.replay_buffer.store(experience)
+
+        # Update state
+        self.curr_state = next_state
         
     def UpdateAlpha(self):
         alpha_new = self.alpha * self.alpha_decay

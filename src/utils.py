@@ -5,8 +5,8 @@ import pandas as pd
 from src.exception import CustomException
 from src.logger import logging
 import dill
-from sklearn.metrics import r2_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import ParameterGrid
+from src.components.model_trainer import RLModelTrainer,RLModelTrainerConfig
 
 def save_object(file_path,obj):
     try:
@@ -25,5 +25,20 @@ def load_object(file_path):
         with open(file_path,"rb") as file_obj:
             return dill.load(file_obj)
         
+    except Exception as e:
+        raise CustomException(e,sys)
+    
+def setup_lunar_lander_grid(params):
+    try:
+        # Get list of hyperparameters
+        grid = ParameterGrid(params)
+
+        # Get number of different experiments to run (i.e. number of hyperparameter combs)
+        num_experiments = len(grid)
+        
+        logging.info(f"Hyperparameter tuning parameters have been loaded.")
+
+        return grid, num_experiments
+    
     except Exception as e:
         raise CustomException(e,sys)
