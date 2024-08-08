@@ -77,10 +77,12 @@ class DoubleQLearner():
             targets = Q_1_preds[:][a_1] # initialize equal to outputs and then add second term
 
             # Add second term to targets
-            targets[not done] += self.alpha * (rews[done] + self.gamma * Q_2_preds[:][a_2]
+            updates = self.alpha * (rews + self.gamma * Q_2_preds[:][a_2]
                                                - targets)
+            targets[not done]  = targets[not done] + updates[not done]
+            targets[done] = targets[done] + self.alpha * rews[done]
             
-            return targets
+            return targets,a_1,updates
         
         except Exception as e:
             raise CustomException(e,sys)
