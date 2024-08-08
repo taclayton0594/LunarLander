@@ -11,12 +11,15 @@ class LunarLander():
                  buf_size=2048,min_buf_size=256,batch_size=32,learn_rate_min=1e-6,eps_min=0.0001,num_states=8,
                  num_actions=4):
         self.alpha = alpha
+        self.alpha_init = alpha
         self.alpha_decay = alpha_decay
         self.alpha_min = alpha_min
         self.learn_rate = learn_rate
+        self.learn_rate_init = learn_rate
         self.learn_rate_decay = learn_rate_decay
         self.gamma = gamma
         self.eps = eps
+        self.eps_init = eps
         self.eps_decay = eps_decay
         self.buf_size = buf_size
         self.min_buf_size = min_buf_size
@@ -67,16 +70,31 @@ class LunarLander():
         except Exception as e:
             raise CustomException(e,sys)
         
+    def ResetEnvironment(self):
+        self.curr_state = self.env.reset()
+        self.reward = 0
+        self.step_count = 0
+        self.alpha = self.alpha_init
+        self.learn_rate = self.learn_rate_init
+        self.eps = self.eps_init
+        
     def EnvironmentStep(self,action):
-        next_state, reward, terminated, truncated, _ = self.env.step(action)
-        done = terminated or truncated
+        try:
+            next_state, reward, terminated, truncated, _ = self.env.step(action)
+            done = terminated or truncated
 
-        # Store new experience
-        experience = self.curr_state, next_state, action, reward, done
-        self.DoubleQLearner.replay_buffer.store(experience)
+            # Store new experience
+            experience = self.curr_state, next_state, action, reward, done
+            self.DoubleQLearner.replay_buffer.store(experience)
 
-        # Update state
-        self.curr_state = next_state
+            # Update state
+            self.curr_state = next_state
+            self.step_count = self.step_count + 1
+
+            return experience
+        
+        except Exception as e:
+            raise CustomException(e,sys)
         
     def UpdateAlpha(self):
         alpha_new = self.alpha * self.alpha_decay
