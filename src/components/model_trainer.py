@@ -101,10 +101,11 @@ class RLModelTrainer:
                     update_var = np.random.random()
 
                     # Get Q values array for state by which model will be updated (chosen at random)
+                    print(torch.tensor(list(self.LunarLander.curr_state[0])))
                     if update_var < 0.5:
-                        Q = self.LunarLander.DoubleQLearner.Q_a(torch.stack(list(self.LunarLander.curr_state[0]), dim=0))
+                        Q = self.LunarLander.DoubleQLearner.Q_a(torch.tensor(list(self.LunarLander.curr_state[0])))
                     else:
-                        Q = self.LunarLander.DoubleQLearner.Q_b(torch.stack(list(self.LunarLander.curr_state[0]), dim=0))
+                        Q = self.LunarLander.DoubleQLearner.Q_b(torch.tensor(list(self.LunarLander.curr_state[0])))
 
                     # Get the next action (using and Epsilon Greedy policy)
                     a = self.LunarLander.DoubleQLearner.getBestActionEps(Q)
