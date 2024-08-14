@@ -6,6 +6,7 @@ from src.components.replay_buffer import ReplayBuffer
 import gym
 from src.components.ann_model import DoubleQLearnerANN,device
 from src.components.lunar_lander import LunarLander
+from src.components.model_trainer import RLModelTrainer,RLModelTrainerConfig
 #from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 
 application = Flask(__name__)
@@ -23,6 +24,8 @@ def index():
 
 if __name__=="__main__":
     #app.run(host='0.0.0.0', port=8080)      
+
+    '''
     buf = ReplayBuffer(100,10)
 
     for i in range(100):
@@ -37,3 +40,6 @@ if __name__=="__main__":
 
     LunarLander = LunarLander()
     print(LunarLander)
+    '''
+    LunarLanderMdl = RLModelTrainer()
+    LunarLanderMdl.start_RL_training()

@@ -19,8 +19,8 @@ class DoubleQLearner():
         self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
         self.Q_a = self.Q_a_obj.ANN_relu
         self.Q_b = self.Q_b_obj.ANN_relu
-        self.Q_a_target = self.Q_a.ANN_relu
-        self.Q_b_target = self.Q_b.ANN_relu
+        self.Q_a_target = self.Q_a
+        self.Q_b_target = self.Q_b
         self.num_actions = num_actions
         self.alpha = alpha
         self.gamma = gamma

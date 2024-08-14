@@ -6,7 +6,6 @@ from src.exception import CustomException
 from src.logger import logging
 import dill
 from sklearn.model_selection import ParameterGrid
-from src.components.model_trainer import RLModelTrainer,RLModelTrainerConfig
 
 def save_object(file_path,obj):
     try:

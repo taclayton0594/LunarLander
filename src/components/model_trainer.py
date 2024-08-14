@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 from dataclasses import dataclass
+import torch
 from torch import nn
 from src.exception import CustomException
 from src.logger import logging
@@ -14,13 +15,14 @@ class RLModelTrainerConfig:
 
 class RLModelTrainer:
     def __init__(self):
-        self.model_trainer_config = RLModelTrainerConfig
+        self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
         self.max_steps = 1000
         self.max_trials = 500 
-        self.rewards = np.empty(float)
+        self.rewards = np.empty((0,),dtype=float)
+        self.experiment_num = 0
 
-    def set_model_hyperparameters():
+    def set_model_hyperparameters(self):
         params = {
             "layer_1_neurons": [32,64,128],
             "layer_2_neurons": [32,64,128],
@@ -45,7 +47,7 @@ class RLModelTrainer:
     
     def set_parameters(self):
         # Get the current hyperparameter values
-        curr_params = self.grid[self.DOE_num]
+        curr_params = self.grid[self.experiment_num]
         layer_1_neurons = curr_params["layer_1_neurons"]
         layer_2_neurons = curr_params["layer_2_neurons"]
         layer_3_neurons = curr_params["layer_3_neurons"]
@@ -100,9 +102,9 @@ class RLModelTrainer:
 
                     # Get Q values array for state by which model will be updated (chosen at random)
                     if update_var < 0.5:
-                        Q = self.LunarLander.DoubleQLearner.Q_a(self.LunarLander.curr_state)
+                        Q = self.LunarLander.DoubleQLearner.Q_a(torch.stack(list(self.LunarLander.curr_state[0]), dim=0))
                     else:
-                        Q = self.LunarLander.DoubleQLearner.Q_b(self.LunarLander.curr_state)
+                        Q = self.LunarLander.DoubleQLearner.Q_b(torch.stack(list(self.LunarLander.curr_state[0]), dim=0))
 
                     # Get the next action (using and Epsilon Greedy policy)
                     a = self.LunarLander.DoubleQLearner.getBestActionEps(Q)
@@ -121,7 +123,7 @@ class RLModelTrainer:
 
                     # End the episode if the epoch is done or the max number of steps have been taken
                     if (self.LunarLander.step_count >= self.max_steps) or done:
-                        logging.info(f"Trial {j}/{self.max_trials} of experiment {i}/{self.num_experiments} 
+                        logging.info(f"Trial {j}/{self.max_trials} of experiment {i}/{self.num_experiments} \
                                      ended with a reward of: {self.LunarLander.reward}")
                         print(f"The final reward of trial {j}/{self.max_trials}: {self.LunarLander.reward}.")  
                         self.rewards = np.append(self.rewards,self.LunarLander.reward,axis=0)
@@ -138,3 +140,6 @@ class RLModelTrainer:
                 self.LunarLander.UpdateAlpha()
                 self.LunarLander.UpdateANNLearnRate()
                 self.LunarLander.UpdateEpsilon()      
+
+                # Increment experiment number
+                self.experiment_num = self.experiment_num + 1

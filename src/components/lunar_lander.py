@@ -30,9 +30,9 @@ class LunarLander():
         self.num_actions = num_actions
         self.reward = 0
         self.step_count = 0
-        self.env = np.empty(dtype=object)
+        self.env = np.empty((1,),dtype=object)
         self.curr_state = np.zeros((num_states,))
-        self.DoubleQLearner = np.empty(dtype=object)
+        self.DoubleQLearner = np.empty((1,),dtype=object)
         logging.info(f"New Lunar Lander object has been created.")
 
     def __str__(self):
