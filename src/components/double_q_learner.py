@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from src.exception import CustomException
@@ -39,8 +40,8 @@ class DoubleQLearner():
             f'batch_size = {self.batch_size}{n1}'
             )
     
-    def getBestAction(self,state): 
-        a = np.argmax(state)
+    def getBestAction(self,Q):
+        a = torch.argmax(Q)
             
         return a
 
@@ -48,10 +49,9 @@ class DoubleQLearner():
         eps_check = np.random.random()
             
         if eps_check <= self.eps:
-            rand_a = np.random.randint(0,self.num_actions,self.batch_size)
-            a = Q[rand_a]
+            a = np.random.randint(0,self.num_actions)
         else:
-            a = np.argmax(Q,axis=0)
+            a = np.argmax(Q)
             
         return a
     

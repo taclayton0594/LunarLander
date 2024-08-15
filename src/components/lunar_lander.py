@@ -64,6 +64,7 @@ class LunarLander():
 
             # get info on environment and seed
             self.curr_state, _ = self.env.reset(seed=seed, options={})
+            self.curr_state = np.squeeze(self.curr_state)
 
             logging.info(f"Lunar Lander environment has been created.")
 
@@ -80,6 +81,7 @@ class LunarLander():
         
     def EnvironmentStep(self,action):
         try:
+            print(f"action={action}")
             next_state, reward, terminated, truncated, _ = self.env.step(action)
             done = terminated or truncated
 
@@ -88,7 +90,7 @@ class LunarLander():
             self.DoubleQLearner.replay_buffer.store(experience)
 
             # Update state
-            self.curr_state = next_state
+            self.curr_state = np.reshape(next_state,(1,8))
             self.step_count = self.step_count + 1
 
             return experience
