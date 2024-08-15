@@ -36,6 +36,8 @@ class ReplayBuffer:
         try:
             # Create a minibatch array that will contains the minibatch
             inds = np.random.choice(self.size,size=self.batch_size) 
+
+            #print(f"replay sample = {self.data[inds][0][0]}")
             
             return self.data[inds][:]
         except Exception as e:

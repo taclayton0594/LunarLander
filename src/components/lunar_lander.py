@@ -81,7 +81,6 @@ class LunarLander():
         
     def EnvironmentStep(self,action):
         try:
-            print(f"action={action}")
             next_state, reward, terminated, truncated, _ = self.env.step(action)
             done = terminated or truncated
 

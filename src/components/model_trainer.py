@@ -101,14 +101,12 @@ class RLModelTrainer:
                     update_var = np.random.random()
 
                     # Get Q values array for state by which model will be updated (chosen at random)
-                    #print(f"curr_state_shape={np.shape(np.array(self.LunarLander.curr_state))}")
                     if update_var < 0.5:
                         Q = self.LunarLander.DoubleQLearner.Q_a(torch.tensor(self.LunarLander.curr_state[0]))
                     else:
                         Q = self.LunarLander.DoubleQLearner.Q_b(torch.tensor(self.LunarLander.curr_state[0]))
 
                     # Get the next action (using and Epsilon Greedy policy)
-                    print(f"Q={Q}")
                     a = self.LunarLander.DoubleQLearner.getBestActionEps(Q)
 
                     # Take a step and store relevant information
@@ -121,6 +119,8 @@ class RLModelTrainer:
                     curr_buf_size = self.LunarLander.DoubleQLearner.replay_buffer.size
                     if ((self.LunarLander.step_count % self.batch_update_steps == 0) and 
                         curr_buf_size >= self.LunarLander.min_buf_size) or done:
+                        print(f"curr_buff_size={curr_buf_size}")
+                        print(f"min_buf_size={self.LunarLander.min_buf_size}")
                         self.LunarLander.DoubleQLearner.train_ANNs(update_var)
 
                     # End the episode if the epoch is done or the max number of steps have been taken
@@ -136,7 +136,7 @@ class RLModelTrainer:
                         self.LunarLander.DoubleQLearner.updateTargetANNs()
 
                     # Write performance to terminal for tracking
-                    print(f"The current reward is: {self.LunarLander.reward}.")    
+                    print(f"The current reward is: {self.LunarLander.reward} on step {self.LunarLander.step_count}.")    
 
                 # Update learning rates
                 self.LunarLander.UpdateAlpha()

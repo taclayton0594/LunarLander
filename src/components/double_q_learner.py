@@ -72,12 +72,13 @@ class DoubleQLearner():
             # Get the model outputs for each batch sample
             s_1_mat = batch[:][0]
             s_2_mat = batch[:][1]
-            Q_1_preds = Q_1(s_1_mat) # Predictions using state 1 (previous state)
-            Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
+            print(f"s_1_shape={batch}")
+            Q_1_preds = Q_1(torch.tensor(s_1_mat[0])) # Predictions using state 1 (previous state)
+            Q_2_preds = Q_2(torch.tensor(s_2_mat[0])) # Predictions for state 2 (next state)
 
             # Get best actions 
-            a_1 = np.argmax(Q_1_preds)
-            a_2 = np.argmax(Q_2_preds)
+            a_1 = torch.argmax(Q_1_preds)
+            a_2 = torch.argmax(Q_2_preds)
 
             # Extract other useful info from batch data
             rews = batch[:][3]
@@ -88,6 +89,8 @@ class DoubleQLearner():
             targets = Q_1_preds # initialize equal to outputs and then add second term
 
             # Add second term to targets
+            print(f"type Q_1: {type(Q_1_preds)}")
+            print(f"shape Q_1: {Q_1_preds.shape}")
             updates = self.alpha * (rews + self.gamma * Q_2_preds[:][a_2]
                                                - targets)
             targets[not done][a_1]  = targets[not done][a_1] + updates[not done]
