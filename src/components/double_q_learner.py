@@ -59,7 +59,7 @@ class DoubleQLearner():
         self.Q_a = self.Q_a_target
         self.Q_b = self.Q_b_target
 
-    def get_targets(self,update_var,batch):
+    def get_targets(self,update_var,states,next_states,actions,rewards,done_bools):
         try:
             # use input value to determine which net to use for target calcs
             if update_var < 0.5:
@@ -70,28 +70,26 @@ class DoubleQLearner():
                 Q_2 = self.Q_a_target
 
             # Get the model outputs for each batch sample
-            s_1_mat = batch[:][0]
-            s_2_mat = batch[:][1]
-            print(f"s_1_shape={batch}")
-            Q_1_preds = Q_1(torch.tensor(s_1_mat[0])) # Predictions using state 1 (previous state)
-            Q_2_preds = Q_2(torch.tensor(s_2_mat[0])) # Predictions for state 2 (next state)
+            s_1_mat = states
+            s_2_mat = next_states
+            Q_1_preds = Q_1(s_1_mat) # Predictions using state 1 (previous state)
+            Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
 
             # Get best actions 
-            a_1 = torch.argmax(Q_1_preds)
-            a_2 = torch.argmax(Q_2_preds)
+            a_1 = torch.argmax(Q_1_preds,dim=1)
+            a_2 = torch.argmax(Q_2_preds,dim=1)
 
             # Extract other useful info from batch data
-            rews = batch[:][3]
-            done = batch[:][4] #boolean array specifying whether the state was a terminal one
+            rews = torch.unsqueeze(rewards,1)
+            done = torch.unsqueeze(done_bools,1) #boolean array specifying whether the state was a terminal one
 
             # Calculate targets for each batch sampe
             # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
             targets = Q_1_preds # initialize equal to outputs and then add second term
 
             # Add second term to targets
-            print(f"type Q_1: {type(Q_1_preds)}")
-            print(f"shape Q_1: {Q_1_preds.shape}")
-            updates = self.alpha * (rews + self.gamma * Q_2_preds[:][a_2]
+            print(f"done={done}")
+            updates = self.alpha * (rews + self.gamma * Q_2_preds.gather(0,torch.unsqueeze(a_1,1))
                                                - targets)
             targets[not done][a_1]  = targets[not done][a_1] + updates[not done]
             targets[done][a_1] = targets[done][a_1] + self.alpha * rews[done]
@@ -104,19 +102,19 @@ class DoubleQLearner():
     def train_ANNs(self,update_var,epochs=1):
         try:
             # Get batch data for training
-            batch_data = self.replay_buffer.sample()
+            states,next_states,actions,rewards,done_bools = self.replay_buffer.sample()
 
             # Get target matrix
-            targets = self.get_targets(update_var,batch_data)
+            targets = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
 
             # Append targets to batch data
-            train_data = np.append(batch_data,targets,axis=0)
+            train_data = np.append(states,targets,axis=0)
 
             # Train ANNs
             if update_var < 0.5:
-                self.Q_a.train(batch_data,epochs)
+                self.Q_a.train(train_data,epochs)
             else:
-                self.Q_b.train(batch_data,epochs)
+                self.Q_b.train(train_data,epochs)
 
         except Exception as e:
             raise CustomException(e,sys)

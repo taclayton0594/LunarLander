@@ -42,7 +42,7 @@ class DoubleQLearnerANN(nn.Module):
 
             # Add output layer
             layers.append(nn.Linear(neurons[i+1],num_outputs))
-            layers.append(nn.Softmax(dim=0))
+            layers.append(nn.Softmax(dim=-1))
 
             # Create sequential model
             self.ANN_relu = nn.Sequential(*layers)
