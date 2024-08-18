@@ -9,7 +9,7 @@ Replay buffer that can store a specified number of samples and create minibatch 
 '''
 class ReplayBuffer:
     def __init__(self,size,batch_size,num_inputs=8):
-        self.data = np.zeros(size, dtype=object)
+        self.data = np.zeros(size, dtype="object")
         self.size = 0
         self.pointer = 0
         self.max_size = size
@@ -49,14 +49,18 @@ class ReplayBuffer:
             # populate minibatch
             for i in range(self.batch_size):
                 curr_ind = inds[i]
-                print(f"test={np.shape(self.data[curr_ind][0])}")
-                print(f"test_2={self.data[curr_ind][0]}")
-                print(np.array(self.data[curr_ind][0],dtype=float))
-                states[i] = torch.from_numpy(np.array(self.data[curr_ind][0],dtype=float)).float()
+                try:
+                    states[i] = torch.from_numpy(np.array(self.data[curr_ind][0],dtype=float)).float()
+                except:
+                    try:
+                        states[i] = torch.from_numpy(np.array(self.data[curr_ind][0][0],dtype=float)).float()
+                        print("Success!")
+                    except Exception as e:
+                        raise CustomException(e,sys)
                 next_states[i] = torch.from_numpy(np.array(self.data[curr_ind][1],dtype=float)).float()
                 actions[i] = self.data[curr_ind][2]
                 rewards[i] = self.data[curr_ind][3]
-                done_bools[i] = self.data[curr_ind][4]
+                done_bools[i] = torch.tensor(self.data[curr_ind][4])
 
             '''
             print(f"states batch = {states}")
