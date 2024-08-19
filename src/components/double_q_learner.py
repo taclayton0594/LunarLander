@@ -88,11 +88,12 @@ class DoubleQLearner():
             targets = Q_1_preds # initialize equal to outputs and then add second term
 
             # Add second term to targets
-            print(f"targets type={targets.dtype}")
-            updates = self.alpha * (rews + self.gamma * Q_2_preds.gather(0,torch.unsqueeze(a_1,1))
-                                               - targets)
-            targets[torch.logical_not(done),a_1]  = targets[torch.logical_not(done),a_1] + updates[not done]
-            targets[done,a_1] = targets[done,a_1] + self.alpha * rews[done]
+            done_inds = done.squeeze()
+            not_done_inds = torch.logical_not(done).squeeze()
+            updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,torch.unsqueeze(a_1,1))
+                                               - targets[:].gather(0,torch.unsqueeze(a_1,1)))
+            targets[not_done_inds,a_1[not_done_inds]]  = torch.squeeze(targets[not_done_inds].gather(0,torch.unsqueeze(a_1[not_done_inds],1)) + updates[not_done_inds])
+            targets[done_inds,a_1[done_inds]] = torch.squeeze(targets[done_inds].gather(0,torch.unsqueeze(a_1[done_inds],1)) + self.alpha * rews[done_inds])
             
             return targets,a_1,updates
         
