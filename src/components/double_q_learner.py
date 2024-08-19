@@ -106,16 +106,18 @@ class DoubleQLearner():
             states,next_states,actions,rewards,done_bools = self.replay_buffer.sample()
 
             # Get target matrix
-            targets = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
+            targets,_,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
 
             # Append targets to batch data
-            train_data = np.append(states,targets,axis=0)
+            train_data = torch.cat((states,targets),axis=1)
+            print(f"train data size = {train_data.shape}")
+            print(f"epochs size = {epochs}")
 
             # Train ANNs
             if update_var < 0.5:
-                self.Q_a.train(train_data,epochs)
+                self.Q_a.train(train_data)
             else:
-                self.Q_b.train(train_data,epochs)
+                self.Q_b.train(train_data)
 
         except Exception as e:
             raise CustomException(e,sys)
