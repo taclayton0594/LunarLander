@@ -68,12 +68,16 @@ class DoubleQLearnerANN(nn.Module):
     def forward(self,x):
         return self.ANN_relu(DataLoader(x))
         
-    def train(self,batch_data,epochs=1):
+    def train_q_learner(self,batch_data,epochs=1):
         try:
             batch_dataloader = DataLoader(batch_data)
+            for (X,y) in enumerate(batch_dataloader):
+                print(f"X = {X}")
+                print(f"y = {y}")
 
+            # Set the module into training mode
             self.ANN_relu.train()
-            for _ in epochs:
+            for _ in range(epochs):
                 for batch, (X, y) in enumerate(batch_dataloader):
                     X, y = X.to(device), y.to(device)
 

@@ -123,8 +123,7 @@ class RLModelTrainer:
 
                     # End the episode if the epoch is done or the max number of steps have been taken
                     if (self.LunarLander.step_count >= self.max_steps) or done:
-                        logging.info(f"Trial {j+1}/{self.max_trials} of experiment {i+1}/{self.num_experiments} \
-                                     ended with a reward of: {self.LunarLander.reward}")
+                        logging.info(f"Trial {j+1}/{self.max_trials} of experiment {i+1}/{self.num_experiments} ended with a reward of: {self.LunarLander.reward}")
                         print(f"The final reward of trial {j+1}/{self.max_trials}: {self.LunarLander.reward}.")  
                         self.rewards = np.append(self.rewards,np.expand_dims(self.LunarLander.reward,axis=0),axis=0)
                         break

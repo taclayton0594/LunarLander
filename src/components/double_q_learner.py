@@ -115,9 +115,13 @@ class DoubleQLearner():
 
             # Train ANNs
             if update_var < 0.5:
-                self.Q_a.train(train_data)
+                # Set the module into training mode
+                self.Q_a.train()
+                self.Q_a_obj.train_q_learner(train_data)
             else:
-                self.Q_b.train(train_data)
+                # Set the module into training mode
+                self.Q_b.train()
+                self.Q_b_obj.train_q_learner(train_data)
 
         except Exception as e:
             raise CustomException(e,sys)
