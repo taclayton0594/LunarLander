@@ -21,7 +21,7 @@ ANN class for double Q learner model. All neural networks will be fully connecte
 Relu as activation function, and Adam optimizer with definable learning rate. NOTE: all models will have at least 2 layers.
 '''
 class DoubleQLearnerANN(nn.Module):
-    def __init__(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss,learn_rate=0.0001):
+    def __init__(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss(),learn_rate=0.0001):
         super().__init__()
         self.num_inputs = num_inputs
         self.num_layers = num_layers
@@ -80,7 +80,7 @@ class DoubleQLearnerANN(nn.Module):
 
                     # Compute prediction error
                     pred = self.ANN_relu(X)
-                    loss = self.loss_fcn(pred, y)
+                    loss = self.loss_fcn()(pred,y)
 
                     # Backpropagation
                     loss.backward()

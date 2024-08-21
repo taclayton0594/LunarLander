@@ -14,7 +14,7 @@ and then another 2 for target nets for each of the previous nets that will be fr
 This freezing of target nets allows for more stable training.
 '''
 class DoubleQLearner():
-    def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss,learn_rate=0.0001,
+    def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),learn_rate=0.0001,
                 num_actions=4,buf_size=2048,batch_size=32,alpha=0.01,gamma=0.99,eps=0):
         self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
         self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
