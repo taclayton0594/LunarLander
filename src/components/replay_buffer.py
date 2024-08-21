@@ -3,6 +3,7 @@ import torch
 import sys
 from src.exception import CustomException
 from src.logger import logging
+from src.components.ann_model import device
 
 '''
 Replay buffer that can store a specified number of samples and create minibatch samples for training.
@@ -17,6 +18,9 @@ class ReplayBuffer:
         self.num_inputs = num_inputs
         logging.info(f"Created new replay buffer of max size: {size} and batch size: {batch_size}.")
             
+    '''
+    Store current info of Lunar Lander state. Update the size of position of the oldest sample. 
+    '''
     def store(self, experience):
         try:
             # Append data frame
@@ -34,14 +38,17 @@ class ReplayBuffer:
         except Exception as e:
             raise CustomException(e,sys)
 
+    '''
+    Get a random batch sample from replay buffer. 
+    '''
     def sample(self):
         try:
             # Initialize batch output variables
-            states = torch.zeros(self.batch_size, self.num_inputs)
-            next_states = torch.zeros(self.batch_size, self.num_inputs)
-            actions = torch.zeros(self.batch_size)
-            rewards = torch.zeros(self.batch_size)
-            done_bools = torch.zeros(self.batch_size,dtype=bool)
+            states = torch.zeros(self.batch_size, self.num_inputs,device=device)
+            next_states = torch.zeros(self.batch_size, self.num_inputs,device=device)
+            actions = torch.zeros(self.batch_size,device=device)
+            rewards = torch.zeros(self.batch_size,device=device)
+            done_bools = torch.zeros(self.batch_size,dtype=bool,device=device)
 
             # Get random batch sample indeces
             inds = np.random.choice(self.size,size=self.batch_size) 
@@ -54,7 +61,6 @@ class ReplayBuffer:
                 except:
                     try:
                         states[i] = torch.from_numpy(np.array(self.data[curr_ind][0][0],dtype=float)).float()
-                        print("Success!")
                     except Exception as e:
                         raise CustomException(e,sys)
                 next_states[i] = torch.from_numpy(np.array(self.data[curr_ind][1],dtype=float)).float()
@@ -62,13 +68,6 @@ class ReplayBuffer:
                 rewards[i] = self.data[curr_ind][3]
                 done_bools[i] = torch.tensor(self.data[curr_ind][4])
 
-            '''
-            print(f"states batch = {states}")
-            print(f"next_states batch = {next_states}")
-            print(f"actions batch = {actions}")
-            print(f"rewards batch = {rewards}")
-            print(f"done_bools batch = {done_bools}")
-            '''
 
             return states,next_states,actions,rewards,done_bools
         except Exception as e:

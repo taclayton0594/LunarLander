@@ -8,6 +8,7 @@ from src.exception import CustomException
 from src.logger import logging
 from src.utils import save_object,setup_lunar_lander_grid
 from src.components.lunar_lander import LunarLander
+from src.components.ann_model import device
 
 @dataclass
 class RLModelTrainerConfig:
@@ -102,9 +103,9 @@ class RLModelTrainer:
 
                     # Get Q values array for state by which model will be updated (chosen at random)
                     if update_var < 0.5:
-                        Q = self.LunarLander.DoubleQLearner.Q_a(torch.tensor(self.LunarLander.curr_state[0]))
+                        Q = self.LunarLander.DoubleQLearner.Q_a(torch.tensor(self.LunarLander.curr_state[0]).to(device))
                     else:
-                        Q = self.LunarLander.DoubleQLearner.Q_b(torch.tensor(self.LunarLander.curr_state[0]))
+                        Q = self.LunarLander.DoubleQLearner.Q_b(torch.tensor(self.LunarLander.curr_state[0]).to(device))
 
                     # Get the next action (using and Epsilon Greedy policy)
                     a = self.LunarLander.DoubleQLearner.getBestActionEps(Q)

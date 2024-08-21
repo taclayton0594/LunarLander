@@ -2,11 +2,11 @@ import sys
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
 from src.exception import CustomException
 from src.logger import logging
 from src.components.ann_model import DoubleQLearnerANN
 from src.components.replay_buffer import ReplayBuffer
+from src.components.custom_data import LunarLanderDataset
 
 '''
 This main class for the RL Double Q-Learner. On initialization, 4 neural networks will be created, 2 for 2 nets used in double Q
@@ -108,10 +108,8 @@ class DoubleQLearner():
             # Get target matrix
             targets,_,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
 
-            # Append targets to batch data
-            train_data = torch.cat((states,targets),axis=1)
-            print(f"train data size = {train_data.shape}")
-            print(f"epochs size = {epochs}")
+            # Convert data to Torch Dataset
+            train_data = LunarLanderDataset(states,targets)
 
             # Train ANNs
             if update_var < 0.5:

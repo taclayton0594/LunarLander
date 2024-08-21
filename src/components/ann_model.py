@@ -45,7 +45,7 @@ class DoubleQLearnerANN(nn.Module):
             layers.append(nn.Softmax(dim=-1))
 
             # Create sequential model
-            self.ANN_relu = nn.Sequential(*layers)
+            self.ANN_relu = nn.Sequential(*layers).to(device)
                 
         except Exception as e:
             raise CustomException(e,sys)
@@ -71,9 +71,6 @@ class DoubleQLearnerANN(nn.Module):
     def train_q_learner(self,batch_data,epochs=1):
         try:
             batch_dataloader = DataLoader(batch_data)
-            for (X,y) in enumerate(batch_dataloader):
-                print(f"X = {X}")
-                print(f"y = {y}")
 
             # Set the module into training mode
             self.ANN_relu.train()
