@@ -79,21 +79,26 @@ class DoubleQLearner():
             a_1 = torch.argmax(Q_1_preds,dim=1)
             a_2 = torch.argmax(Q_2_preds,dim=1)
 
+            # Get number of samples
+            batch_size = len(a_1)
+
             # Extract other useful info from batch data
-            rews = torch.unsqueeze(rewards,1)
-            done = torch.unsqueeze(done_bools,1) #boolean array specifying whether the state was a terminal one
+            # rews = torch.unsqueeze(rewards,1)
+            # done = torch.unsqueeze(done_bools,1) #boolean array specifying whether the state was a terminal one
+            rews = rewards.view(batch_size,1)
+            done = done_bools.view(batch_size,1)
 
             # Calculate targets for each batch sampe
             # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
             targets = Q_1_preds # initialize equal to outputs and then add second term
 
             # Add second term to targets
-            done_inds = done.squeeze()
-            not_done_inds = torch.logical_not(done).squeeze()
-            updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,torch.unsqueeze(a_1,1))
-                                               - targets[:].gather(0,torch.unsqueeze(a_1,1)))
-            targets[not_done_inds,a_1[not_done_inds]]  = torch.squeeze(targets[not_done_inds].gather(0,torch.unsqueeze(a_1[not_done_inds],1)) + updates[not_done_inds])
-            targets[done_inds,a_1[done_inds]] = torch.squeeze(targets[done_inds].gather(0,torch.unsqueeze(a_1[done_inds],1)) + self.alpha * rews[done_inds])
+            done_inds = done.view(batch_size)
+            not_done_inds = torch.logical_not(done).view(batch_size)
+            updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_1.view(batch_size,1))
+                                               - targets[:].gather(0,a_1.view(batch_size,1)))
+            targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(0,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
+            targets[done_inds,a_1[done_inds]] = (targets[done_inds].gather(0,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
             
             return targets,a_1,updates
         

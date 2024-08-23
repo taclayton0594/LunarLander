@@ -16,6 +16,8 @@ device = (
 )
 logging.info(f"Using {device} device for neural network training.")
 
+torch.autograd.set_detect_anomaly(True)
+
 '''
 ANN class for double Q learner model. All neural networks will be fully connected, use
 Relu as activation function, and Adam optimizer with definable learning rate. NOTE: all models will have at least 2 layers.
@@ -83,7 +85,7 @@ class DoubleQLearnerANN(nn.Module):
                     loss = self.loss_fcn()(pred,y)
 
                     # Backpropagation
-                    loss.backward()
+                    loss.backward(retain_graph=True)
                     self.optimizer.step()
                     self.optimizer.zero_grad()
 
