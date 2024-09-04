@@ -7,13 +7,14 @@ from src.logger import logging
 from torch.utils.data import DataLoader
 
 # Get cpu, gpu or mps device for training.
-device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
-)
+# device = (
+#     "cuda"
+#     if torch.cuda.is_available()
+#     else "mps"
+#     if torch.backends.mps.is_available()
+#     else "cpu"
+# )
+device = "cpu"
 logging.info(f"Using {device} device for neural network training.")
 
 torch.autograd.set_detect_anomaly(True)
@@ -68,7 +69,8 @@ class DoubleQLearnerANN(nn.Module):
             )
     
     def forward(self,x):
-        return self.ANN_relu(DataLoader(x))
+        out = self.ANN_relu(DataLoader(x))
+        return out
         
     def train_q_learner(self,batch_data,epochs=1):
         try:

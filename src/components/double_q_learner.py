@@ -70,35 +70,38 @@ class DoubleQLearner():
                 Q_2 = self.Q_a_target
 
             # Get the model outputs for each batch sample
-            s_1_mat = states
+            s_1_mat = torch.tensor(states).clone()
             s_2_mat = next_states
-            Q_1_preds = Q_1(s_1_mat) # Predictions using state 1 (previous state)
+            Q_1_preds = torch.tensor(Q_1(s_1_mat)).clone() # Predictions using state 1 (previous state)
             Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
 
             # Get best actions 
             a_1 = torch.argmax(Q_1_preds,dim=1)
             a_2 = torch.argmax(Q_2_preds,dim=1)
 
-            # Get number of samples
-            batch_size = len(a_1)
-
             # Extract other useful info from batch data
             # rews = torch.unsqueeze(rewards,1)
             # done = torch.unsqueeze(done_bools,1) #boolean array specifying whether the state was a terminal one
-            rews = rewards.view(batch_size,1)
-            done = done_bools.view(batch_size,1)
+            rews = rewards.view(self.batch_size,1)
+            done = done_bools.view(self.batch_size,1)
 
             # Calculate targets for each batch sampe
             # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
             targets = Q_1_preds # initialize equal to outputs and then add second term
 
             # Add second term to targets
-            done_inds = done.view(batch_size)
-            not_done_inds = torch.logical_not(done).view(batch_size)
-            updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_1.view(batch_size,1))
-                                               - targets[:].gather(0,a_1.view(batch_size,1)))
+            done_inds = done.view(self.batch_size)
+            not_done_inds = torch.logical_not(done).view(self.batch_size)
+            # a_1 = a_1.clone()
+            # targets = targets.clone()
+            print(f"sum(done_inds) = {sum(done_inds)}")
+            print(f"a_1[done_inds].view(sum(done_inds),1) = {a_1[done_inds].view(sum(done_inds),1)}")
+            # Q_2_arr = Q_2_preds[:].gather(0,a_1.view(self.batch_size,1))
+            targets_arr = targets.clone()[:].gather(0,a_1.view(self.batch_size,1))
+            updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_1.view(self.batch_size,1))
+                                               - targets_arr)
             targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(0,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
-            targets[done_inds,a_1[done_inds]] = (targets[done_inds].gather(0,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
+            targets[done_inds,a_1[done_inds]] = (targets.clone()[done_inds].gather(0,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
             
             return targets,a_1,updates
         
