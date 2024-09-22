@@ -92,16 +92,19 @@ class DoubleQLearner():
             # Add second term to targets
             done_inds = done.view(self.batch_size)
             not_done_inds = torch.logical_not(done).view(self.batch_size)
+            '''
             # a_1 = a_1.clone()
             # targets = targets.clone()
+            print(f"shape targets[done_inds]={targets[done_inds].shape}")
             print(f"sum(done_inds) = {sum(done_inds)}")
             print(f"a_1[done_inds].view(sum(done_inds),1) = {a_1[done_inds].view(sum(done_inds),1)}")
             # Q_2_arr = Q_2_preds[:].gather(0,a_1.view(self.batch_size,1))
-            targets_arr = targets.clone()[:].gather(0,a_1.view(self.batch_size,1))
+            '''
+            targets_arr = targets.clone()[:].gather(1,a_1.view(self.batch_size,1))
             updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_1.view(self.batch_size,1))
                                                - targets_arr)
-            targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(0,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
-            targets[done_inds,a_1[done_inds]] = (targets.clone()[done_inds].gather(0,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
+            targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(1,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
+            targets[done_inds,a_1[done_inds]] = (targets[done_inds].gather(1,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
             
             return targets,a_1,updates
         
