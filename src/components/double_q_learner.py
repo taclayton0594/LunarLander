@@ -15,7 +15,7 @@ This freezing of target nets allows for more stable training.
 '''
 class DoubleQLearner():
     def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),learn_rate=0.0001,
-                num_actions=4,buf_size=2048,batch_size=32,alpha=0.01,gamma=0.99,eps=0):
+                num_actions=4,buf_size=50000,batch_size=32,alpha=0.01,gamma=0.99,eps=0):
         self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
         self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
         self.Q_a = self.Q_a_obj.ANN_relu
@@ -70,9 +70,9 @@ class DoubleQLearner():
                 Q_2 = self.Q_a_target
 
             # Get the model outputs for each batch sample
-            s_1_mat = torch.tensor(states).clone()
+            s_1_mat = torch.tensor(states).clone() #.detach().requires_grad_(True)
             s_2_mat = next_states
-            Q_1_preds = torch.tensor(Q_1(s_1_mat)).clone() # Predictions using state 1 (previous state)
+            Q_1_preds = torch.tensor(Q_1(s_1_mat)).clone() #.detach().requires_grad_(True) # Predictions using state 1 (previous state)
             Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
 
             # Get best actions 
@@ -122,7 +122,6 @@ class DoubleQLearner():
             # Convert data to Torch Dataset
             train_data = LunarLanderDataset(states,targets)
 
-            start_time = time.time()
             # Train ANNs
             if update_var < 0.5:
                 # Set the module into training mode

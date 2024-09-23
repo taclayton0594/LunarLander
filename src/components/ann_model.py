@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader
 from src.exception import CustomException
 from src.logger import logging
 from torch.utils.data import DataLoader
-import time
 
 # Get cpu, gpu or mps device for training.
 device = (
@@ -79,7 +78,6 @@ class DoubleQLearnerANN(nn.Module):
 
             # Set the module into training mode
             self.ANN_relu.train()
-            start_time = time.time()
             for _ in range(epochs):
                 for batch, (X, y) in enumerate(batch_dataloader):
                     # Compute prediction error
@@ -90,8 +88,6 @@ class DoubleQLearnerANN(nn.Module):
                     loss.backward(retain_graph=True)
                     self.optimizer.step()                    
                     self.optimizer.zero_grad()
-
-            print(f'One train loop took {time.time()-start_time} seconds')
 
         except Exception as e:
             raise CustomException(e,sys)

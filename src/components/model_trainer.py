@@ -19,7 +19,7 @@ class RLModelTrainer:
         self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
         self.max_steps = 1000
-        self.max_trials = 500 
+        self.max_trials = 1000 
         self.rewards = np.empty((0,),dtype=float)
         self.experiment_num = 0
 
@@ -28,14 +28,14 @@ class RLModelTrainer:
             "layer_1_neurons": [32,64,128],
             "layer_2_neurons": [32,64,128],
             "layer_3_neurons": [0,32,64],
-            "alpha": [0.001,0.01,0.1],
-            "alpha_decay": [0.98,0.992],
-            "learn_rate": [0.0001,0.001], #will not decay NN learning rate for now to reduce DOE
-            "eps_decay": [0.98,0.992], # epsilon will always start at 1
-            "buf_size": [2048,8192], # minimum buffer size will always be 2*batch_size
-            "batch_size": [32,64,128],
-            "target_update_steps": [32,128],
-            "batch_update_steps": [1,8]
+            "alpha": [0.001],
+            "alpha_decay": [0.992],
+            "learn_rate": [0.0001], #will not decay NN learning rate for now to reduce DOE
+            "eps_decay": [0.992], # epsilon will always start at 1
+            "buf_size": [50000], # minimum buffer size will always be 2000
+            "batch_size": [32],
+            "target_update_steps": [256],
+            "batch_update_steps": [1]
         }
 
         return params
@@ -132,9 +132,6 @@ class RLModelTrainer:
                     # Update target ANNs if counter hit
                     if self.LunarLander.step_count % self.target_update_steps == 0:
                         self.LunarLander.DoubleQLearner.updateTargetANNs()
-
-                    # Write performance to terminal for tracking
-                    print(f"The current reward is: {self.LunarLander.reward} on step {self.LunarLander.step_count}.")    
 
                 # Update learning rates
                 self.LunarLander.UpdateAlpha()
