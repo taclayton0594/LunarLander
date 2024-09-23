@@ -27,10 +27,10 @@ class RLModelTrainer:
         params = {
             "layer_1_neurons": [32,64,128],
             "layer_2_neurons": [32,64,128],
-            "layer_3_neurons": [0,32,64],
-            "alpha": [0.001],
+            "layer_3_neurons": [32],
+            "alpha": [0.01],
             "alpha_decay": [0.992],
-            "learn_rate": [0.0001], #will not decay NN learning rate for now to reduce DOE
+            "learn_rate": [0.001], #will not decay NN learning rate for now to reduce DOE
             "eps_decay": [0.992], # epsilon will always start at 1
             "buf_size": [50000], # minimum buffer size will always be 2000
             "batch_size": [32],
@@ -136,7 +136,11 @@ class RLModelTrainer:
                 # Update learning rates
                 self.LunarLander.UpdateAlpha()
                 self.LunarLander.UpdateANNLearnRate()
-                self.LunarLander.UpdateEpsilon()      
+                self.LunarLander.UpdateEpsilon()  
+
+                if (j+1) % 10 == 0:
+                    print(f"alpha = {self.LunarLander.alpha}")
+                    print(f"epsilon = {self.LunarLander.eps}") 
 
                 # Increment experiment number
                 self.experiment_num = self.experiment_num + 1

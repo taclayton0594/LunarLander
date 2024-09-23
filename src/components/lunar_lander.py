@@ -75,9 +75,6 @@ class LunarLander():
         self.curr_state = self.env.reset()
         self.reward = 0
         self.step_count = 0
-        self.alpha = self.alpha_init
-        self.learn_rate = self.learn_rate_init
-        self.eps = self.eps_init
         
     def EnvironmentStep(self,action):
         try:
@@ -108,7 +105,7 @@ class LunarLander():
     def UpdateANNLearnRate(self):
         learn_rate_new = self.learn_rate * self.learn_rate_decay
 
-        if learn_rate_new > self.alpha_min:
+        if learn_rate_new > self.learn_rate_min:
             self.learn_rate = learn_rate_new
 
         logging.info("ANN learning rate has been decremented.")

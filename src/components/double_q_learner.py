@@ -59,6 +59,8 @@ class DoubleQLearner():
         self.Q_a = self.Q_a_target
         self.Q_b = self.Q_b_target
 
+        logging.info("Target networks have been updated.")
+
     def get_targets(self,update_var,states,next_states,actions,rewards,done_bools):
         try:
             # use input value to determine which net to use for target calcs

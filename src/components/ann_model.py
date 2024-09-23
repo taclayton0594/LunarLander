@@ -83,11 +83,18 @@ class DoubleQLearnerANN(nn.Module):
                     # Compute prediction error
                     pred = self.ANN_relu(X)
                     loss = self.loss_fcn()(pred,y)
+                    #print(f"Loss pre = {loss}")
 
                     # Backpropagation
                     loss.backward(retain_graph=True)
                     self.optimizer.step()                    
                     self.optimizer.zero_grad()
+
+                    '''
+                    pred = self.ANN_relu(X)
+                    loss = self.loss_fcn()(pred,y)
+                    print(f"Loss post = {loss}")
+                    '''
 
         except Exception as e:
             raise CustomException(e,sys)
