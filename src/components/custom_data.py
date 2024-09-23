@@ -21,3 +21,7 @@ class LunarLanderDataset(Dataset):
             outputs = self.target_transform(self.batch_outputs)
 
         return inputs[idx,:], outputs[idx,:]
+    
+    def pin_memory(self):
+        self.batch_inputs = self.batch_inputs.pin_memory()
+        self.batch_outputs = self.batch_outputs.pin_memory()

@@ -122,15 +122,17 @@ class DoubleQLearner():
             # Convert data to Torch Dataset
             train_data = LunarLanderDataset(states,targets)
 
+            start_time = time.time()
             # Train ANNs
             if update_var < 0.5:
                 # Set the module into training mode
                 self.Q_a.train()
-                self.Q_a_obj.train_q_learner(train_data)
+                self.Q_a_obj.train_q_learner(train_data,self.batch_size)
             else:
                 # Set the module into training mode
                 self.Q_b.train()
-                self.Q_b_obj.train_q_learner(train_data)
+                self.Q_b_obj.train_q_learner(train_data,self.batch_size)
+
 
         except Exception as e:
             raise CustomException(e,sys)

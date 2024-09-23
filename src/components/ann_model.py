@@ -5,16 +5,17 @@ from torch.utils.data import DataLoader
 from src.exception import CustomException
 from src.logger import logging
 from torch.utils.data import DataLoader
+import time
 
 # Get cpu, gpu or mps device for training.
-# device = (
-#     "cuda"
-#     if torch.cuda.is_available()
-#     else "mps"
-#     if torch.backends.mps.is_available()
-#     else "cpu"
-# )
-device = "cpu"
+device = (
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
+# device = "cpu"
 logging.info(f"Using {device} device for neural network training.")
 
 torch.autograd.set_detect_anomaly(True)
@@ -72,24 +73,25 @@ class DoubleQLearnerANN(nn.Module):
         out = self.ANN_relu(DataLoader(x))
         return out
         
-    def train_q_learner(self,batch_data,epochs=1):
+    def train_q_learner(self,batch_data,batch_size,epochs=1):
         try:
-            batch_dataloader = DataLoader(batch_data)
+            batch_dataloader = DataLoader(batch_data,batch_size=batch_size)
 
             # Set the module into training mode
             self.ANN_relu.train()
+            start_time = time.time()
             for _ in range(epochs):
                 for batch, (X, y) in enumerate(batch_dataloader):
-                    X, y = X.to(device), y.to(device)
-
                     # Compute prediction error
                     pred = self.ANN_relu(X)
                     loss = self.loss_fcn()(pred,y)
 
                     # Backpropagation
                     loss.backward(retain_graph=True)
-                    self.optimizer.step()
+                    self.optimizer.step()                    
                     self.optimizer.zero_grad()
+
+            print(f'One train loop took {time.time()-start_time} seconds')
 
         except Exception as e:
             raise CustomException(e,sys)
