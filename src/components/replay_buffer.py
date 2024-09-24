@@ -46,7 +46,7 @@ class ReplayBuffer:
             # Initialize batch output variables
             states = torch.zeros(self.batch_size, self.num_inputs,device=device)
             next_states = torch.zeros(self.batch_size, self.num_inputs,device=device)
-            actions = torch.zeros(self.batch_size,device=device)
+            actions = torch.zeros(self.batch_size,device=device,dtype=torch.int64)
             rewards = torch.zeros(self.batch_size,device=device)
             done_bools = torch.zeros(self.batch_size,dtype=bool,device=device)
 
@@ -67,7 +67,6 @@ class ReplayBuffer:
                 actions[i] = self.data[curr_ind][2]
                 rewards[i] = self.data[curr_ind][3]
                 done_bools[i] = torch.tensor(self.data[curr_ind][4])
-
 
             return states,next_states,actions,rewards,done_bools
         except Exception as e:
