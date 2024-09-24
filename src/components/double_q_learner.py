@@ -78,8 +78,8 @@ class DoubleQLearner():
             Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
 
             # Get best actions 
-            a_1 = torch.argmax(Q_1_preds,dim=1)
-            a_2 = torch.argmax(Q_2_preds,dim=1)
+            a_1 = actions
+            a_2 = torch.argmax(Q_1_preds,dim=1)
 
             # Extract other useful info from batch data
             # rews = torch.unsqueeze(rewards,1)
@@ -101,13 +101,17 @@ class DoubleQLearner():
             print(f"sum(done_inds) = {sum(done_inds)}")
             print(f"a_1[done_inds].view(sum(done_inds),1) = {a_1[done_inds].view(sum(done_inds),1)}")
             # Q_2_arr = Q_2_preds[:].gather(0,a_1.view(self.batch_size,1))
+
+            print(f"rewards={rewards}")
+            print(f"targets={targets}")
+            print(f"a_1={a_1}")
             '''
             targets_arr = targets.clone()[:].gather(1,a_1.view(self.batch_size,1))
-            updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_1.view(self.batch_size,1))
+            updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1))
                                                - targets_arr)
             targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(1,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
             targets[done_inds,a_1[done_inds]] = (targets[done_inds].gather(1,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
-            
+
             return targets,a_1,updates
         
         except Exception as e:
