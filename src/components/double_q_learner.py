@@ -79,7 +79,7 @@ class DoubleQLearner():
 
             # Get best actions 
             a_1 = actions
-            a_2 = torch.argmax(Q_2_preds,dim=1)
+            a_2 = torch.argmax(torch.tensor(Q_1(s_2_mat)).clone(),dim=1)
 
             # Extract other useful info from batch data
             # rews = torch.unsqueeze(rewards,1)

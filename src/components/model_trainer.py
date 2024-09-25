@@ -79,9 +79,25 @@ class RLModelTrainer:
         # Create Double Q learner
         self.initialize_Q_Learner(num_layers,neurons)
 
+    def printPerformance(self):
+        # calculate 100pt moving average of rewards
+        if self.experiment_num <= 100:
+            mov_avg = np.sum(self.rewards) / self.experiment_num
+        else:
+            mov_avg = np.sum(self.rewards[-100:]) / 100.0
+
+        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.experiment_num}."
+        print(str_out)
+        logging.info(str_out)
+
+
     def start_RL_training(self):
         # Initialize the grid of hyperparameters for each experiment
         self.get_hyperparameter_grid()
+
+        # Create array to hold rewards
+        num_trials = self.num_experiments * self.max_trials
+        rewards = np.zero((num_trials,)) 
 
         # Initalize the gym environment
         self.LunarLander.CreateEnvironment()
@@ -141,6 +157,8 @@ class RLModelTrainer:
                 if (j+1) % 10 == 0:
                     print(f"alpha = {self.LunarLander.alpha}")
                     print(f"epsilon = {self.LunarLander.eps}") 
+
+                    self.printPerformance()
 
                 # Increment experiment number
                 self.experiment_num = self.experiment_num + 1
