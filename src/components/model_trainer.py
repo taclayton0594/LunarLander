@@ -97,7 +97,7 @@ class RLModelTrainer:
 
         # Create array to hold rewards
         num_trials = self.num_experiments * self.max_trials
-        rewards = np.zero((num_trials,)) 
+        rewards = np.zeros((num_trials,)) 
 
         # Initalize the gym environment
         self.LunarLander.CreateEnvironment()
