@@ -19,7 +19,7 @@ class RLModelTrainer:
         self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
         self.max_steps = 1000
-        self.max_trials = 1000 
+        self.max_trials = 5000 
         self.rewards = np.empty((0,),dtype=float)
         self.experiment_num = 0
 
@@ -28,13 +28,13 @@ class RLModelTrainer:
             "layer_1_neurons": [32,64,128],
             "layer_2_neurons": [32,64,128],
             "layer_3_neurons": [32],
-            "alpha": [0.01],
-            "alpha_decay": [0.992],
+            "alpha": [0.0001],
+            "alpha_decay": [0.995],
             "learn_rate": [0.001], #will not decay NN learning rate for now to reduce DOE
-            "eps_decay": [0.992], # epsilon will always start at 1
-            "buf_size": [50000], # minimum buffer size will always be 2000
+            "eps_decay": [0.9993], # epsilon will always start at 1
+            "buf_size": [100000], # minimum buffer size will always be 2000
             "batch_size": [32],
-            "target_update_steps": [256],
+            "target_update_steps": [5000],
             "batch_update_steps": [1]
         }
 
