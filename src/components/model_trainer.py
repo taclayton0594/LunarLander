@@ -134,7 +134,7 @@ class RLModelTrainer:
 
                     # Train model if counter has been reached and the buffer has enough elements or the episode has ended
                     curr_buf_size = self.LunarLander.DoubleQLearner.replay_buffer.size
-                    if ((self.LunarLander.eps_step_count % self.batch_update_steps == 0) and 
+                    if ((self.LunarLander.tot_step_count % self.batch_update_steps == 0) and 
                         curr_buf_size >= self.LunarLander.min_buf_size):
                         self.LunarLander.DoubleQLearner.train_ANNs(update_var)
 
@@ -146,7 +146,7 @@ class RLModelTrainer:
                         break
 
                     # Update target ANNs if counter hit
-                    if self.LunarLander.eps_step_count % self.target_update_steps == 0:
+                    if self.LunarLander.tot_step_count % self.target_update_steps == 0:
                         self.LunarLander.DoubleQLearner.updateTargetANNs()
 
                 # Update learning rates
