@@ -91,16 +91,9 @@ class DoubleQLearner():
 
             # Calculate targets for each batch sampe
             # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
-            # targets = Q_1_preds # initialize equal to outputs and then add second term
-
-            # Add second term to targets
-            # done_inds = done.view(self.batch_size)
-            # not_done_inds = torch.logical_not(done).view(self.batch_size)
+            targets = Q_1_preds # initialize equal to outputs and then add second term
         
-            # print(f"rewards={rewards}")
-            # print(f"targets={targets}")
-            # print(f"a_1={a_1}")
-            targets = (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1)) * done).view(self.batch_size)
+            targets[torch.arange(self.batch_size).long(),a_1] = (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1)) * done).view(self.batch_size)
             # targets_arr = targets.clone()[:].gather(1,a_1.view(self.batch_size,1))
             # print(f"targets_arr={targets_arr}")
             # updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1))
