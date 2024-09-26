@@ -93,7 +93,7 @@ class DoubleQLearner():
             # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
             targets = Q_1_preds # initialize equal to outputs and then add second term
         
-            targets[torch.arange(self.batch_size).long(),a_1] = (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1)) * done).view(self.batch_size)
+            targets[torch.arange(self.batch_size).long(),a_1] = (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1)) * (1 - done)).view(self.batch_size)
             # targets_arr = targets.clone()[:].gather(1,a_1.view(self.batch_size,1))
             # print(f"targets_arr={targets_arr}")
             # updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1))
