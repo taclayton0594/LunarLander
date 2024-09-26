@@ -7,7 +7,7 @@ from src.logger import logging
 from src.components.double_q_learner import DoubleQLearner
 
 class LunarLander():
-    def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-4,learn_rate=0.001,learn_rate_decay=1,gamma=0.99,eps=1,eps_decay=0.992,
+    def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-6,learn_rate=0.001,learn_rate_decay=1,gamma=0.99,eps=1,eps_decay=0.992,
                  buf_size=2048,min_buf_size=2000,batch_size=32,learn_rate_min=1e-6,eps_min=0.0001,num_states=8,
                  num_actions=4):
         self.alpha = alpha
@@ -29,7 +29,8 @@ class LunarLander():
         self.num_states = num_states
         self.num_actions = num_actions
         self.reward = 0
-        self.step_count = 0
+        self.eps_step_count = 0
+        self.tot_step_count = 0
         self.env = np.empty((1,),dtype=object)
         self.curr_state = np.zeros((num_states,))
         self.DoubleQLearner = np.empty((1,),dtype=object)
@@ -74,7 +75,7 @@ class LunarLander():
     def ResetEnvironment(self):
         self.curr_state = self.env.reset()
         self.reward = 0
-        self.step_count = 0
+        self.eps_step_count = 0
         
     def EnvironmentStep(self,action):
         try:
@@ -87,7 +88,8 @@ class LunarLander():
 
             # Update state
             self.curr_state = np.reshape(next_state,(1,8))
-            self.step_count = self.step_count + 1
+            self.eps_step_count = self.eps_step_count + 1
+            self.tot_step_count = self.tot_step_count + 1
 
             return experience
         

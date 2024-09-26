@@ -29,9 +29,9 @@ class RLModelTrainer:
             "layer_2_neurons": [32,64,128],
             "layer_3_neurons": [32],
             "alpha": [0.0001],
-            "alpha_decay": [0.995],
+            "alpha_decay": [0.9995],
             "learn_rate": [0.001], #will not decay NN learning rate for now to reduce DOE
-            "eps_decay": [0.9993], # epsilon will always start at 1
+            "eps_decay": [0.999], # epsilon will always start at 1
             "buf_size": [100000], # minimum buffer size will always be 2000
             "batch_size": [32],
             "target_update_steps": [5000],
@@ -86,7 +86,7 @@ class RLModelTrainer:
         else:
             mov_avg = np.sum(self.rewards[-100:]) / 100.0
 
-        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.experiment_num}."
+        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.experiment_num+1}."
         print(str_out)
         logging.info(str_out)
 
@@ -134,19 +134,19 @@ class RLModelTrainer:
 
                     # Train model if counter has been reached and the buffer has enough elements or the episode has ended
                     curr_buf_size = self.LunarLander.DoubleQLearner.replay_buffer.size
-                    if ((self.LunarLander.step_count % self.batch_update_steps == 0) and 
+                    if ((self.LunarLander.eps_step_count % self.batch_update_steps == 0) and 
                         curr_buf_size >= self.LunarLander.min_buf_size):
                         self.LunarLander.DoubleQLearner.train_ANNs(update_var)
 
                     # End the episode if the epoch is done or the max number of steps have been taken
-                    if (self.LunarLander.step_count >= self.max_steps) or done:
+                    if (self.LunarLander.eps_step_count >= self.max_steps) or done:
                         logging.info(f"Trial {j+1}/{self.max_trials} of experiment {i+1}/{self.num_experiments} ended with a reward of: {self.LunarLander.reward}")
                         print(f"The final reward of trial {j+1}/{self.max_trials}: {self.LunarLander.reward}.")  
                         self.rewards = np.append(self.rewards,np.expand_dims(self.LunarLander.reward,axis=0),axis=0)
                         break
 
                     # Update target ANNs if counter hit
-                    if self.LunarLander.step_count % self.target_update_steps == 0:
+                    if self.LunarLander.eps_step_count % self.target_update_steps == 0:
                         self.LunarLander.DoubleQLearner.updateTargetANNs()
 
                 # Update learning rates
