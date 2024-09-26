@@ -25,16 +25,16 @@ class RLModelTrainer:
 
     def set_model_hyperparameters(self):
         params = {
-            "layer_1_neurons": [32,64,128],
-            "layer_2_neurons": [32,64,128],
-            "layer_3_neurons": [32],
+            "layer_1_neurons": [32],
+            "layer_2_neurons": [32],
+            "layer_3_neurons": [16],
             "alpha": [0.0001],
             "alpha_decay": [0.9995],
             "learn_rate": [0.001], #will not decay NN learning rate for now to reduce DOE
-            "eps_decay": [0.999], # epsilon will always start at 1
+            "eps_decay": [0.993], # epsilon will always start at 1
             "buf_size": [100000], # minimum buffer size will always be 2000
-            "batch_size": [32],
-            "target_update_steps": [5000],
+            "batch_size": [32,64],
+            "target_update_steps": [10,50],
             "batch_update_steps": [1]
         }
 
@@ -150,9 +150,10 @@ class RLModelTrainer:
                         self.LunarLander.DoubleQLearner.updateTargetANNs()
 
                 # Update learning rates
-                self.LunarLander.UpdateAlpha()
-                self.LunarLander.UpdateANNLearnRate()
-                self.LunarLander.UpdateEpsilon()  
+                if (curr_buf_size >= self.LunarLander.min_buf_size):
+                    self.LunarLander.UpdateAlpha()
+                    self.LunarLander.UpdateANNLearnRate()
+                    self.LunarLander.UpdateEpsilon()  
 
                 if (j+1) % 10 == 0:
                     print(f"alpha = {self.LunarLander.alpha}")

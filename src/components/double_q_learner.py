@@ -91,30 +91,26 @@ class DoubleQLearner():
 
             # Calculate targets for each batch sampe
             # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
-            targets = Q_1_preds # initialize equal to outputs and then add second term
+            # targets = Q_1_preds # initialize equal to outputs and then add second term
 
             # Add second term to targets
-            done_inds = done.view(self.batch_size)
-            not_done_inds = torch.logical_not(done).view(self.batch_size)
-            '''
-            # a_1 = a_1.clone()
-            # targets = targets.clone()
-            print(f"shape targets[done_inds]={targets[done_inds].shape}")
-            print(f"sum(done_inds) = {sum(done_inds)}")
-            print(f"a_1[done_inds].view(sum(done_inds),1) = {a_1[done_inds].view(sum(done_inds),1)}")
-            # Q_2_arr = Q_2_preds[:].gather(0,a_1.view(self.batch_size,1))
+            # done_inds = done.view(self.batch_size)
+            # not_done_inds = torch.logical_not(done).view(self.batch_size)
+        
+            # print(f"rewards={rewards}")
+            # print(f"targets={targets}")
+            # print(f"a_1={a_1}")
+            targets = (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1)) * done).view(self.batch_size)
+            # targets_arr = targets.clone()[:].gather(1,a_1.view(self.batch_size,1))
+            # print(f"targets_arr={targets_arr}")
+            # updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1))
+            #                                    - targets_arr)
+            # print(f"updates={updates}")
+            # targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(1,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
+            # targets[done_inds,a_1[done_inds]] = (targets[done_inds].gather(1,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
+            # print(f"targets final = {targets}")
 
-            print(f"rewards={rewards}")
-            print(f"targets={targets}")
-            print(f"a_1={a_1}")
-            '''
-            targets_arr = targets.clone()[:].gather(1,a_1.view(self.batch_size,1))
-            updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1))
-                                               - targets_arr)
-            targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(1,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
-            targets[done_inds,a_1[done_inds]] = (targets[done_inds].gather(1,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
-
-            return targets,a_1,updates
+            return targets,a_1
         
         except Exception as e:
             raise CustomException(e,sys)
@@ -125,7 +121,7 @@ class DoubleQLearner():
             states,next_states,actions,rewards,done_bools = self.replay_buffer.sample()
 
             # Get target matrix
-            targets,_,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
+            targets,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
 
             # Convert data to Torch Dataset
             train_data = LunarLanderDataset(states,targets)
