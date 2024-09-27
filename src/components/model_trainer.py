@@ -84,12 +84,12 @@ class RLModelTrainer:
 
     def printPerformance(self):
         # calculate 100pt moving average of rewards
-        if self.LunarLander.tot_step_count <= 100:
-            mov_avg = np.sum(self.rewards) / self.LunarLander.tot_step_count
+        if self.trial_num <= 100:
+            mov_avg = np.sum(self.rewards) / self.trial_num
         else:
             mov_avg = np.sum(self.rewards[-100:]) / 100.0
 
-        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.LunarLander.tot_step_count}."
+        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.trial_num}."
         print(str_out)
         logging.info(str_out)
 
