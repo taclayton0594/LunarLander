@@ -14,18 +14,17 @@ and then another 2 for target nets for each of the previous nets that will be fr
 This freezing of target nets allows for more stable training.
 '''
 class DoubleQLearner():
-    def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),learn_rate=0.0001,
-                num_actions=4,buf_size=50000,batch_size=32,alpha=0.01,gamma=0.99,eps=0):
-        self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
-        self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
-        self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
-        self.Q_b_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,learn_rate)
+    def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),num_actions=4,buf_size=50000,batch_size=32,
+                 alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99,eps=1.0,steps_to_update=10000):
+        self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update)
+        self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update)
+        self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update)
+        self.Q_b_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update)
         self.Q_a = self.Q_a_obj.ANN_relu
         self.Q_b = self.Q_b_obj.ANN_relu
         self.Q_a_target = self.Q_a_obj_target.ANN_relu
         self.Q_b_target = self.Q_b_obj_target.ANN_relu
         self.num_actions = num_actions
-        self.alpha = alpha
         self.gamma = gamma
         self.eps = eps
         self.batch_size = batch_size
@@ -36,7 +35,6 @@ class DoubleQLearner():
         n1='\n'
         return (
             f'Double Q-Learner with the following parameters:{n1}'
-            f'alpha = {self.alpha}{n1}'
             f'gamma = {self.gamma}{n1}'
             f'eps = {self.eps}{n1}'
             f'batch_size = {self.batch_size}{n1}'
@@ -67,16 +65,16 @@ class DoubleQLearner():
         try:
             # use input value to determine which net to use for target calcs
             if update_var < 0.5:
-                Q_1 = self.Q_a_target
+                Q_1 = self.Q_a
                 Q_2 = self.Q_b_target
             else:
-                Q_1 = self.Q_b_target
+                Q_1 = self.Q_b
                 Q_2 = self.Q_a_target
 
             # Get the model outputs for each batch sample
-            s_1_mat = torch.tensor(states).clone() #.detach().requires_grad_(True)
+            s_1_mat = torch.tensor(states).clone() 
             s_2_mat = next_states
-            Q_1_preds = torch.tensor(Q_1(s_1_mat)).clone() #.detach().requires_grad_(True) # Predictions using state 1 (previous state)
+            Q_1_preds = torch.tensor(Q_1(s_1_mat)).clone() # Predictions using state 1 (previous state)
             Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
 
             # Get best actions 
@@ -89,14 +87,9 @@ class DoubleQLearner():
 
             # Calculate targets for each batch sampe
             # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
-            targets = Q_1_preds # initialize equal to outputs and then add second term
+            targets = Q_1_preds # initialize equal to outputs 
         
             targets[torch.arange(self.batch_size).long(),a_1] = (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1)) * (1 - done.int())).view(self.batch_size)
-            # targets_arr = targets.clone()[:].gather(1,a_1.view(self.batch_size,1))
-            # updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1))
-            #                                    - targets_arr)
-            # targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(1,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
-            # targets[done_inds,a_1[done_inds]] = (targets[done_inds].gather(1,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
 
             return targets,a_1
         
@@ -117,11 +110,9 @@ class DoubleQLearner():
             # Train ANNs
             if update_var < 0.5:
                 # Set the module into training mode
-                self.Q_a.train()
                 self.Q_a_obj.train_q_learner(train_data,self.batch_size)
             else:
                 # Set the module into training mode
-                self.Q_b.train()
                 self.Q_b_obj.train_q_learner(train_data,self.batch_size)
 
 

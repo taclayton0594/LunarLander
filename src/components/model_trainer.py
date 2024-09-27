@@ -31,7 +31,6 @@ class RLModelTrainer:
             "layer_3_neurons": [16],
             "alpha": [0.0001],
             "alpha_decay": [0.9995],
-            "learn_rate": [0.0001], #will not decay NN learning rate for now to reduce DOE
             "eps_decay": [0.993], # epsilon will always start at 1
             "buf_size": [100000], # minimum buffer size will always be 2000
             "batch_size": [64],
@@ -56,7 +55,6 @@ class RLModelTrainer:
         neurons = [layer_1_neurons,layer_2_neurons,layer_3_neurons]
         alpha = curr_params["alpha"]
         alpha_decay = curr_params["alpha_decay"]
-        learn_rate = curr_params["learn_rate"]
         eps_decay = curr_params["eps_decay"]
         buf_size = curr_params["buf_size"]
         batch_size = curr_params["batch_size"]
@@ -66,11 +64,10 @@ class RLModelTrainer:
         # Set corresponding values in LunarLander object (NOTE: other parameters are constant for each experiment)
         self.LunarLander.alpha = alpha
         self.LunarLander.alpha_decay = alpha_decay
-        self.LunarLander.learn_rate = learn_rate
         self.LunarLander.eps_decay = eps_decay
         self.LunarLander.buf_size = buf_size
         self.LunarLander.batch_size = batch_size
-        self.trial_num = 0
+        self.trial_num = 1
         self.LunarLander.tot_step_count = 0 # needed when starting next hyperparamter experiment
 
         # Get the number of layers
@@ -100,7 +97,6 @@ class RLModelTrainer:
 
         # Create array to hold rewards
         num_trials = self.num_experiments * self.max_trials
-        rewards = np.zeros((num_trials,)) 
 
         # Initalize the gym environment
         self.LunarLander.CreateEnvironment()
@@ -153,10 +149,8 @@ class RLModelTrainer:
                         (curr_buf_size >= self.LunarLander.min_buf_size)):
                         self.LunarLander.DoubleQLearner.updateTargetANNs()
 
-                # Update learning rates
+                # Update Epsilon
                 if (curr_buf_size >= self.LunarLander.min_buf_size):
-                    self.LunarLander.UpdateAlpha()
-                    self.LunarLander.UpdateANNLearnRate()
                     self.LunarLander.UpdateEpsilon()  
 
                 if (j+1) % 10 == 0:

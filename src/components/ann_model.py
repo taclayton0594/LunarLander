@@ -24,7 +24,8 @@ ANN class for double Q learner model. All neural networks will be fully connecte
 Relu as activation function, and Adam optimizer with definable learning rate. NOTE: all models will have at least 2 layers.
 '''
 class DoubleQLearnerANN(nn.Module):
-    def __init__(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss(),learn_rate=0.0001):
+    def __init__(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss(),learn_rate=0.0001,
+                 learn_rate_decay=1.0,learn_rate_min=1e-6,steps_to_update=10000):
         super().__init__()
         self.num_inputs = num_inputs
         self.num_layers = num_layers
@@ -32,6 +33,8 @@ class DoubleQLearnerANN(nn.Module):
         self.num_outputs = num_outputs
         self.loss_fcn = loss
         self.learn_rate = learn_rate
+        self.learn_rate_decay = learn_rate_decay
+        self.learn_rate_min = learn_rate_min
         try:
             # Create model structure and add input layer
             layers = []
@@ -54,6 +57,8 @@ class DoubleQLearnerANN(nn.Module):
             raise CustomException(e,sys)
         
         self.optimizer = torch.optim.Adam(self.ANN_relu.parameters(),lr=learn_rate)
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[steps_to_update], 
+                                                              gamma=learn_rate_decay)
         logging.info(f"Neural network initialized.")
         
     def __str__(self):
@@ -71,6 +76,9 @@ class DoubleQLearnerANN(nn.Module):
     def forward(self,x):
         out = self.ANN_relu(DataLoader(x))
         return out
+    
+    def get_lr(self):
+        return self.optimizer.param_groups[0]['lr']
         
     def train_q_learner(self,batch_data,batch_size,epochs=1):
         try:
@@ -90,6 +98,8 @@ class DoubleQLearnerANN(nn.Module):
                     self.optimizer.step()                    
                     self.optimizer.zero_grad()
 
+                    if self.get_lr() > self.learn_rate_min:
+                        self.scheduler.step()
                     '''
                     pred = self.ANN_relu(X)
                     loss = self.loss_fcn()(pred,y)
