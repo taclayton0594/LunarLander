@@ -84,8 +84,6 @@ class DoubleQLearner():
             a_2 = torch.argmax(torch.tensor(Q_1(s_2_mat)).clone(),dim=1)
 
             # Extract other useful info from batch data
-            # rews = torch.unsqueeze(rewards,1)
-            # done = torch.unsqueeze(done_bools,1) #boolean array specifying whether the state was a terminal one
             rews = rewards.view(self.batch_size,1)
             done = done_bools.view(self.batch_size,1)
 
@@ -95,13 +93,10 @@ class DoubleQLearner():
         
             targets[torch.arange(self.batch_size).long(),a_1] = (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1)) * (1 - done.int())).view(self.batch_size)
             # targets_arr = targets.clone()[:].gather(1,a_1.view(self.batch_size,1))
-            # print(f"targets_arr={targets_arr}")
             # updates = self.alpha * (rews + self.gamma * Q_2_preds[:].gather(0,a_2.view(self.batch_size,1))
             #                                    - targets_arr)
-            # print(f"updates={updates}")
             # targets[not_done_inds,a_1[not_done_inds]]  = (targets[not_done_inds].gather(1,a_1[not_done_inds].view(sum(not_done_inds),1)) + updates[not_done_inds]).view(sum(not_done_inds))
             # targets[done_inds,a_1[done_inds]] = (targets[done_inds].gather(1,a_1[done_inds].view(sum(done_inds),1)) + self.alpha * rews[done_inds]).view(sum(done_inds))
-            # print(f"targets final = {targets}")
 
             return targets,a_1
         

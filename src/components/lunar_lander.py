@@ -62,6 +62,7 @@ class LunarLander():
             # initialize environment
             self.env = gym.make('LunarLander-v2',render_mode="human")
             self.env.action_space.seed(seed)
+            self.tot_step_count = 0 # needed when starting next hyperparamter experiment
 
             # get info on environment and seed
             self.curr_state, _ = self.env.reset(seed=seed, options={})

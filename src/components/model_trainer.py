@@ -19,9 +19,10 @@ class RLModelTrainer:
         self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
         self.max_steps = 1000
-        self.max_trials = 5000 
+        self.max_trials = 2000 
         self.rewards = np.empty((0,),dtype=float)
         self.experiment_num = 0
+        self.trial_num = 0
 
     def set_model_hyperparameters(self):
         params = {
@@ -30,10 +31,10 @@ class RLModelTrainer:
             "layer_3_neurons": [16],
             "alpha": [0.0001],
             "alpha_decay": [0.9995],
-            "learn_rate": [0.001], #will not decay NN learning rate for now to reduce DOE
+            "learn_rate": [0.0001], #will not decay NN learning rate for now to reduce DOE
             "eps_decay": [0.993], # epsilon will always start at 1
             "buf_size": [100000], # minimum buffer size will always be 2000
-            "batch_size": [32,64],
+            "batch_size": [64],
             "target_update_steps": [10,50],
             "batch_update_steps": [1]
         }
@@ -69,6 +70,8 @@ class RLModelTrainer:
         self.LunarLander.eps_decay = eps_decay
         self.LunarLander.buf_size = buf_size
         self.LunarLander.batch_size = batch_size
+        self.trial_num = 0
+        self.LunarLander.tot_step_count = 0 # needed when starting next hyperparamter experiment
 
         # Get the number of layers
         if layer_3_neurons == 0:
@@ -81,12 +84,12 @@ class RLModelTrainer:
 
     def printPerformance(self):
         # calculate 100pt moving average of rewards
-        if self.experiment_num <= 100:
-            mov_avg = np.sum(self.rewards) / self.experiment_num
+        if self.LunarLander.tot_step_count <= 100:
+            mov_avg = np.sum(self.rewards) / self.LunarLander.tot_step_count
         else:
             mov_avg = np.sum(self.rewards[-100:]) / 100.0
 
-        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.experiment_num+1}."
+        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.LunarLander.tot_step_count}."
         print(str_out)
         logging.info(str_out)
 
@@ -162,5 +165,8 @@ class RLModelTrainer:
 
                     self.printPerformance()
 
-                # Increment experiment number
-                self.experiment_num = self.experiment_num + 1
+                # Increment trial number
+                self.trial_num = self.trial_num + 1
+
+            # Increment experiment number
+            self.experiment_num = self.experiment_num + 1
