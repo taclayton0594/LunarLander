@@ -16,10 +16,10 @@ This freezing of target nets allows for more stable training.
 class DoubleQLearner():
     def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),num_actions=4,buf_size=50000,batch_size=32,
                  alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99,eps=1.0,steps_to_update=10000):
-        self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update)
-        self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update)
-        self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update)
-        self.Q_b_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update)
+        self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update/2)
+        self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,steps_to_update/2)
+        self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,0)
+        self.Q_b_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min,0)
         self.Q_a = self.Q_a_obj.ANN_relu
         self.Q_b = self.Q_b_obj.ANN_relu
         self.Q_a_target = self.Q_a_obj_target.ANN_relu

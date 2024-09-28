@@ -25,7 +25,7 @@ Relu as activation function, and Adam optimizer with definable learning rate. NO
 '''
 class DoubleQLearnerANN(nn.Module):
     def __init__(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss(),learn_rate=0.0001,
-                 learn_rate_decay=1.0,learn_rate_min=1e-6,steps_to_update=10000):
+                 learn_rate_decay=1.0,learn_rate_min=1e-6,steps_to_update=100):
         super().__init__()
         self.num_inputs = num_inputs
         self.num_layers = num_layers
@@ -91,7 +91,9 @@ class DoubleQLearnerANN(nn.Module):
                     # Compute prediction error
                     pred = self.ANN_relu(X)
                     loss = self.loss_fcn()(pred,y)
-                    #print(f"Loss pre = {loss}")
+                    # print(f"pred={pred}")
+                    # print(f"y={y}")
+                    # print(f"Loss pre = {loss}")
 
                     # Backpropagation
                     loss.backward(retain_graph=True)
@@ -100,11 +102,11 @@ class DoubleQLearnerANN(nn.Module):
 
                     if self.get_lr() > self.learn_rate_min:
                         self.scheduler.step()
-                    '''
+                    
                     pred = self.ANN_relu(X)
                     loss = self.loss_fcn()(pred,y)
-                    print(f"Loss post = {loss}")
-                    '''
+                    # print(f"post pred = {pred}")
+                    # print(f"Loss post = {loss}")
 
         except Exception as e:
             raise CustomException(e,sys)

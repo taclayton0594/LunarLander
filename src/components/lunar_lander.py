@@ -47,8 +47,7 @@ class LunarLander():
     def CreateQLearner(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss):
         try:
             self.DoubleQLearner = DoubleQLearner(num_layers,neurons,num_inputs,loss,self.num_actions,self.buf_size,
-                                                 self.batch_size,self.alpha,self.alpha_decay,self.alpha_min,self.gamma,
-                                                 self.eps,self.min_buf_size)
+                                                 self.batch_size,self.alpha,self.alpha_decay,self.alpha_min,self.gamma)
         except Exception as e:
             raise CustomException(e,sys)
 
@@ -99,5 +98,5 @@ class LunarLander():
         if eps_new > self.eps_min:
             self.eps = eps_new
 
-        logging.info("Epsilon decay factor has been decremented.")
+            logging.info("Epsilon decay factor has been decremented.")
         

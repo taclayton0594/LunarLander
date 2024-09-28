@@ -29,12 +29,12 @@ class RLModelTrainer:
             "layer_1_neurons": [32],
             "layer_2_neurons": [32],
             "layer_3_neurons": [16],
-            "alpha": [0.0001],
+            "alpha": [0.01,0.001],
             "alpha_decay": [0.9995],
             "eps_decay": [0.993], # epsilon will always start at 1
             "buf_size": [100000], # minimum buffer size will always be 2000
             "batch_size": [64],
-            "target_update_steps": [10,50],
+            "target_update_steps": [10],
             "batch_update_steps": [1]
         }
 
@@ -154,7 +154,8 @@ class RLModelTrainer:
                     self.LunarLander.UpdateEpsilon()  
 
                 if (j+1) % 10 == 0:
-                    print(f"alpha = {self.LunarLander.alpha}")
+                    print(f"alpha_a = {self.LunarLander.DoubleQLearner.Q_a_obj.get_lr()}")
+                    print(f"alpha_b = {self.LunarLander.DoubleQLearner.Q_b_obj.get_lr()}")
                     print(f"epsilon = {self.LunarLander.eps}") 
 
                     self.printPerformance()
