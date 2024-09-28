@@ -29,7 +29,7 @@ class RLModelTrainer:
             "layer_1_neurons": [32],
             "layer_2_neurons": [32],
             "layer_3_neurons": [16],
-            "alpha": [0.01,0.001],
+            "alpha": [0.001],
             "alpha_decay": [0.9995],
             "eps_decay": [0.993], # epsilon will always start at 1
             "buf_size": [100000], # minimum buffer size will always be 2000

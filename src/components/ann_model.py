@@ -25,7 +25,7 @@ Relu as activation function, and Adam optimizer with definable learning rate. NO
 '''
 class DoubleQLearnerANN(nn.Module):
     def __init__(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss(),learn_rate=0.0001,
-                 learn_rate_decay=1.0,learn_rate_min=1e-6,steps_to_update=100):
+                 learn_rate_decay=1.0,learn_rate_min=1e-6,steps_to_update=100,max_steps=10000):
         super().__init__()
         self.num_inputs = num_inputs
         self.num_layers = num_layers
@@ -52,12 +52,14 @@ class DoubleQLearnerANN(nn.Module):
 
             # Create sequential model
             self.ANN_relu = nn.Sequential(*layers).to(device)
+            self.apply(self.initialize_weights)
                 
         except Exception as e:
             raise CustomException(e,sys)
         
         self.optimizer = torch.optim.Adam(self.ANN_relu.parameters(),lr=learn_rate)
-        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=[steps_to_update], 
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, 
+                                                              milestones=torch.arange(steps_to_update,max_steps,steps_to_update),
                                                               gamma=learn_rate_decay)
         logging.info(f"Neural network initialized.")
         
@@ -72,6 +74,12 @@ class DoubleQLearnerANN(nn.Module):
             f'loss function = {self.loss_fcn}{n1}'
             f'learn_rate = {self.learn_rate}{n1}'
             )
+    
+    def initialize_weights(self,module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.xavier_uniform_(module.weight)
+            if module.bias is not None:
+                module.bias.data.zero_()
     
     def forward(self,x):
         out = self.ANN_relu(DataLoader(x))

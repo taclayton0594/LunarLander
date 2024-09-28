@@ -8,7 +8,7 @@ from src.components.double_q_learner import DoubleQLearner
 
 class LunarLander():
     def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-6,gamma=0.99,eps=1,eps_decay=0.992,
-                 buf_size=2048,min_buf_size=10000,batch_size=32,eps_min=0.0001,num_states=8,
+                 buf_size=2048,min_buf_size=10000,batch_size=32,eps_min=0.01,num_states=8,
                  num_actions=4):
         self.alpha = alpha
         self.alpha_init = alpha
