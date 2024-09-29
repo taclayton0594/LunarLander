@@ -24,6 +24,7 @@ class DoubleQLearner():
         self.Q_b = self.Q_b_obj.ANN_relu
         self.Q_a_target = self.Q_a_obj_target.ANN_relu
         self.Q_b_target = self.Q_b_obj_target.ANN_relu
+        self.updateTargetANNs()
         self.num_actions = num_actions
         self.gamma = gamma
         self.eps = eps

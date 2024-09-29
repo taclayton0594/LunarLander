@@ -29,12 +29,12 @@ class RLModelTrainer:
             "layer_1_neurons": [32],
             "layer_2_neurons": [32],
             "layer_3_neurons": [16],
-            "alpha": [0.001],
+            "alpha": [0.0001],
             "alpha_decay": [0.9995],
-            "eps_decay": [0.993], # epsilon will always start at 1
-            "buf_size": [100000], # minimum buffer size will always be 2000
+            "eps_decay": [0.994,0.999], # epsilon will always start at 1
+            "buf_size": [100000], 
             "batch_size": [64],
-            "target_update_steps": [10],
+            "target_update_steps": [25],
             "batch_update_steps": [1]
         }
 
@@ -86,7 +86,7 @@ class RLModelTrainer:
         else:
             mov_avg = np.sum(self.rewards[-100:]) / 100.0
 
-        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.trial_num}."
+        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.trial_num} of experiment {self.experiment_num}."
         print(str_out)
         logging.info(str_out)
 
