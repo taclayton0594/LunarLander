@@ -30,8 +30,8 @@ class RLModelTrainer:
             "layer_2_neurons": [32],
             "layer_3_neurons": [16],
             "alpha": [0.0001],
-            "alpha_decay": [0.9995],
-            "eps_decay": [0.994,0.999], # epsilon will always start at 1
+            "alpha_decay": [0.995],
+            "eps_decay": [0.996], # epsilon will always start at 1
             "buf_size": [100000], 
             "batch_size": [64],
             "target_update_steps": [25],
@@ -82,11 +82,11 @@ class RLModelTrainer:
     def printPerformance(self):
         # calculate 100pt moving average of rewards
         if self.trial_num <= 100:
-            mov_avg = np.sum(self.rewards) / self.trial_num
+            mov_avg = np.sum(self.rewards[-(self.trial_num-1):]) / self.trial_num
         else:
             mov_avg = np.sum(self.rewards[-100:]) / 100.0
 
-        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.trial_num} of experiment {self.experiment_num}."
+        str_out = f"The 100 trial moving average is {mov_avg} at trial {self.trial_num} of experiment {self.experiment_num+1}."
         print(str_out)
         logging.info(str_out)
 
@@ -94,9 +94,6 @@ class RLModelTrainer:
     def start_RL_training(self):
         # Initialize the grid of hyperparameters for each experiment
         self.get_hyperparameter_grid()
-
-        # Create array to hold rewards
-        num_trials = self.num_experiments * self.max_trials
 
         # Initalize the gym environment
         self.LunarLander.CreateEnvironment()

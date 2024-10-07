@@ -105,6 +105,9 @@ class DoubleQLearner():
             # Get target matrix
             targets,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
 
+            print(f"states={states}")
+            print(f"targets={targets}")
+
             # Convert data to Torch Dataset
             train_data = LunarLanderDataset(states,targets)
 
