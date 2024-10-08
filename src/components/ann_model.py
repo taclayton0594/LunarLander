@@ -58,9 +58,8 @@ class DoubleQLearnerANN(nn.Module):
             raise CustomException(e,sys)
         
         self.optimizer = torch.optim.Adam(self.ANN_relu.parameters(),lr=learn_rate)
-        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, 
-                                                              milestones=torch.arange(steps_to_update,max_steps,steps_to_update),
-                                                              gamma=learn_rate_decay)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,step_size=steps_to_update,
+                                                            gamma=learn_rate_decay)
         logging.info(f"Neural network initialized.")
         
     def __str__(self):
@@ -99,22 +98,17 @@ class DoubleQLearnerANN(nn.Module):
                     # Compute prediction error
                     pred = self.ANN_relu(X)
                     loss = self.loss_fcn()(pred,y)
-                    # print(f"pred={pred}")
-                    # print(f"y={y}")
-                    # print(f"Loss pre = {loss}")
 
                     # Backpropagation
                     loss.backward(retain_graph=True)
                     self.optimizer.step()                    
                     self.optimizer.zero_grad()
-
-                    if self.get_lr() > self.learn_rate_min:
-                        self.scheduler.step()
                     
                     pred = self.ANN_relu(X)
                     loss = self.loss_fcn()(pred,y)
-                    # print(f"post pred = {pred}")
-                    # print(f"Loss post = {loss}")
+
+                if self.get_lr() > self.learn_rate_min:
+                    self.scheduler.step()
 
         except Exception as e:
             raise CustomException(e,sys)
