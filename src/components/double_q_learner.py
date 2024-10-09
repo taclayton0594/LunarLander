@@ -67,8 +67,9 @@ class DoubleQLearner():
             # use input value to determine which net to use for target calcs
             if update_var < 0.5:
                 Q_1 = self.Q_a
-                Q_2 = self.Q_b_target
+                Q_2 = self.Q_a_target #self.Q_b_target
             else:
+                print("should never get here")
                 Q_1 = self.Q_b
                 Q_2 = self.Q_a_target
 

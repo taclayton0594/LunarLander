@@ -29,12 +29,12 @@ class RLModelTrainer:
             "layer_1_neurons": [32],
             "layer_2_neurons": [32],
             "layer_3_neurons": [16],
-            "alpha": [0.001],
-            "alpha_decay": [0.995],
-            "eps_decay": [0.996], # epsilon will always start at 1
+            "alpha": [0.00001],
+            "alpha_decay": [0.9999],
+            "eps_decay": [0.997], # epsilon will always start at 1
             "buf_size": [100000], 
-            "batch_size": [64],
-            "target_update_steps": [25],
+            "batch_size": [32],
+            "target_update_steps": [10],
             "batch_update_steps": [1]
         }
 
@@ -64,6 +64,7 @@ class RLModelTrainer:
         # Set corresponding values in LunarLander object (NOTE: other parameters are constant for each experiment)
         self.LunarLander.alpha = alpha
         self.LunarLander.alpha_decay = alpha_decay
+        self.LunarLander.eps = 1.0
         self.LunarLander.eps_decay = eps_decay
         self.LunarLander.buf_size = buf_size
         self.LunarLander.batch_size = batch_size
@@ -111,7 +112,7 @@ class RLModelTrainer:
                 # Run until the experiment ends or max steps hit
                 while True:
                     # Determine which matrix to update
-                    update_var = np.random.random()
+                    update_var = 0 #np.random.random()
 
                     # Get Q values array for state by which model will be updated (chosen at random)
                     if update_var < 0.5:

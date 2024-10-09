@@ -25,7 +25,7 @@ Relu as activation function, and Adam optimizer with definable learning rate. NO
 '''
 class DoubleQLearnerANN(nn.Module):
     def __init__(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss(),learn_rate=0.0001,
-                 learn_rate_decay=1.0,learn_rate_min=1e-6,steps_to_update=100,max_steps=10000):
+                 learn_rate_decay=1.0,learn_rate_min=1e-5,steps_to_update=100,max_steps=10000):
         super().__init__()
         self.num_inputs = num_inputs
         self.num_layers = num_layers
@@ -87,7 +87,7 @@ class DoubleQLearnerANN(nn.Module):
     def get_lr(self):
         return self.optimizer.param_groups[0]['lr']
         
-    def train_q_learner(self,batch_data,batch_size,epochs=1):
+    def train_q_learner(self,batch_data,batch_size,epochs=4):
         try:
             batch_dataloader = DataLoader(batch_data,batch_size=batch_size)
 
