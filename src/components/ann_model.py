@@ -87,7 +87,7 @@ class DoubleQLearnerANN(nn.Module):
     def get_lr(self):
         return self.optimizer.param_groups[0]['lr']
         
-    def train_q_learner(self,batch_data,batch_size,epochs=4):
+    def train_q_learner(self,batch_data,batch_size,epochs=1):
         try:
             batch_dataloader = DataLoader(batch_data,batch_size=batch_size)
 

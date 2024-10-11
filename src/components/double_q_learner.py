@@ -74,14 +74,14 @@ class DoubleQLearner():
                 Q_2 = self.Q_a_target
 
             # Get the model outputs for each batch sample
-            s_1_mat = torch.tensor(states).clone() 
-            s_2_mat = next_states
-            Q_1_preds = torch.tensor(Q_1(s_1_mat)).clone() # Predictions using state 1 (previous state)
-            Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
+            s_1_mat = states.clone().detach()
+            s_2_mat = next_states.clone().detach()
+            Q_1_preds = Q_1(s_1_mat).clone() # Predictions using state 1 (previous state)
+            Q_2_preds = Q_2(s_2_mat).clone() # Predictions for state 2 (next state)
 
             # Get best actions 
             a_1 = actions
-            a_2 = torch.argmax(torch.tensor(Q_1(s_2_mat)).clone(),dim=1)
+            a_2 = torch.argmax(Q_1(s_2_mat).clone(),dim=1)
 
             # Extract other useful info from batch data
             rews = rewards.view(self.batch_size,1)

@@ -12,5 +12,5 @@ swig
 tensorflow
 ipykernel
 pygame
-#torch
+torch
 #-e .
