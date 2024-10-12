@@ -94,18 +94,16 @@ class DoubleQLearnerANN(nn.Module):
             # Set the module into training mode
             self.ANN_relu.train()
             for _ in range(epochs):
-                for batch, (X, y) in enumerate(batch_dataloader):
+                for batch,(X,y) in enumerate(batch_dataloader):
                     # Compute prediction error
-                    pred = self.ANN_relu(X)
-                    loss = self.loss_fcn()(pred,y)
+                    loss = self.loss_fcn()(X,y)
+
+                    # Clear gradients before each step
+                    self.optimizer.zero_grad()
 
                     # Backpropagation
-                    loss.backward(retain_graph=True)
-                    self.optimizer.step()                    
-                    self.optimizer.zero_grad()
-                    
-                    pred = self.ANN_relu(X)
-                    loss = self.loss_fcn()(pred,y)
+                    loss.backward()
+                    self.optimizer.step()                 
 
                 if self.get_lr() > self.learn_rate_min:
                     self.scheduler.step()

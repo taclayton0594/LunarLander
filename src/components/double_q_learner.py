@@ -76,12 +76,14 @@ class DoubleQLearner():
             # Get the model outputs for each batch sample
             s_1_mat = states.clone().detach()
             s_2_mat = next_states.clone().detach()
-            Q_1_preds = Q_1(s_1_mat).clone() # Predictions using state 1 (previous state)
             Q_2_preds = Q_2(s_2_mat).clone() # Predictions for state 2 (next state)
 
             # Get best actions 
             a_1 = actions
             a_2 = torch.argmax(Q_1(s_2_mat).clone(),dim=1)
+
+            # Get prediction
+            Q_1_preds = Q_1(s_1_mat).clone().gather(1,a_1.view(self.batch_size,1)).view(self.batch_size) # Predictions using state 1 (previous state)
 
             # Extract other useful info from batch data
             rews = rewards.view(self.batch_size,1)
@@ -89,11 +91,11 @@ class DoubleQLearner():
 
             # Calculate targets for each batch sampe
             # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
-            targets = Q_1_preds # initialize equal to outputs 
+            # targets = Q_1_preds # initialize equal to outputs 
         
-            targets[torch.arange(self.batch_size).long(),a_1] = (rews + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)) * (1 - done.int())).view(self.batch_size)
+            targets = (rews + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)) * (1 - done.int())).view(self.batch_size)
 
-            return targets,a_1
+            return Q_1_preds,targets,a_1
         
         except Exception as e:
             raise CustomException(e,sys)
@@ -104,10 +106,10 @@ class DoubleQLearner():
             states,next_states,actions,rewards,done_bools = self.replay_buffer.sample()
 
             # Get target matrix
-            targets,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
-
+            preds,targets,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
+            
             # Convert data to Torch Dataset
-            train_data = LunarLanderDataset(states,targets)
+            train_data = LunarLanderDataset(preds,targets)
 
             # Train ANNs
             if update_var < 0.5:
