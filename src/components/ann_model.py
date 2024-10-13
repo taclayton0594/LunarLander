@@ -36,6 +36,7 @@ class DoubleQLearnerANN(nn.Module):
         self.learn_rate_decay = learn_rate_decay
         self.learn_rate_min = learn_rate_min
         self.train_step_count = 0
+        self.running_loss = 0
         try:
             # Create model structure and add input layer
             layers = []
@@ -98,6 +99,7 @@ class DoubleQLearnerANN(nn.Module):
                 for batch,(X,y) in enumerate(batch_dataloader):
                     # Compute prediction error
                     loss = self.loss_fcn()(X,y)
+                    self.running_loss += loss
 
                     # Clear gradients before each step
                     self.optimizer.zero_grad()
@@ -109,8 +111,12 @@ class DoubleQLearnerANN(nn.Module):
                 if self.get_lr() > self.learn_rate_min:
                     self.scheduler.step()
 
-                if (self.train_step_count % 1000 == 1):
-                    print(f"Batch error = {loss} on train step number {self.train_step_count}.")
+            # turn off training mode
+            self.ANN_relu.eval()
+
+            if (self.train_step_count % 1000 == 0):
+                avg_err = self.running_loss / self.train_step_count
+                print(f"Average batch error is = {avg_err} on train step #{self.train_step_count}.")
 
         except Exception as e:
             raise CustomException(e,sys)

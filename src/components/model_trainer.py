@@ -19,22 +19,22 @@ class RLModelTrainer:
         self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
         self.max_steps = 1000
-        self.max_trials = 2500 
+        self.max_trials = 1500 
         self.rewards = np.empty((0,),dtype=float)
         self.experiment_num = 0
         self.trial_num = 0
 
     def set_model_hyperparameters(self):
         params = {
-            "layer_1_neurons": [32],
-            "layer_2_neurons": [32],
-            "layer_3_neurons": [16],
+            "layer_1_neurons": [64],
+            "layer_2_neurons": [64],
+            "layer_3_neurons": [0],
             "alpha": [0.001],
-            "alpha_decay": [0.9997],
-            "eps_decay": [0.996], # epsilon will always start at 1
+            "alpha_decay": [0.999],
+            "eps_decay": [0.99], # epsilon will always start at 1
             "buf_size": [20000], 
             "batch_size": [32],
-            "target_update_steps": [250],
+            "target_update_steps": [25],
             "batch_update_steps": [1]
         }
 
