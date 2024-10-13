@@ -89,10 +89,7 @@ class DoubleQLearner():
             rews = rewards.view(self.batch_size,1)
             done = done_bools.view(self.batch_size,1)
 
-            # Calculate targets for each batch sampe
-            # NOTE: sample in batch = x_1,x_2,a_1,reward,buf_done (rows)
-            # targets = Q_1_preds # initialize equal to outputs 
-        
+            # Calculate targets for each batch sample
             targets = (rews + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)) * (1 - done.int())).view(self.batch_size)
 
             return Q_1_preds,targets,a_1

@@ -29,12 +29,12 @@ class RLModelTrainer:
             "layer_1_neurons": [32],
             "layer_2_neurons": [32],
             "layer_3_neurons": [16],
-            "alpha": [0.00001,0.0001],
+            "alpha": [0.001],
             "alpha_decay": [0.9997],
             "eps_decay": [0.996], # epsilon will always start at 1
-            "buf_size": [100000], 
+            "buf_size": [20000], 
             "batch_size": [32],
-            "target_update_steps": [25],
+            "target_update_steps": [250],
             "batch_update_steps": [1]
         }
 
