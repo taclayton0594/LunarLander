@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from src.exception import CustomException
 from src.logger import logging
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
 
 # Get cpu, gpu or mps device for training.
 device = (
@@ -37,28 +38,12 @@ class DoubleQLearnerANN(nn.Module):
         self.learn_rate_min = learn_rate_min
         self.train_step_count = 0
         self.running_loss = 0
-        try:
-            # Create model structure and add input layer
-            layers = []
-            layers.append(nn.Linear(num_inputs,neurons[0]))
-            layers.append(nn.ReLU())
-
-            # Add additional layers except last
-            for i in range(num_layers-1):
-                layers.append(nn.Linear(neurons[i],neurons[i+1]))
-                layers.append(nn.ReLU())
-
-            # Add output layer
-            layers.append(nn.Linear(neurons[i+1],num_outputs))
-
-            # Create sequential model
-            self.ANN_relu = nn.Sequential(*layers).to(device)
-            self.apply(self.initialize_weights)
-                
-        except Exception as e:
-            raise CustomException(e,sys)
+        self.lin1 = nn.Linear(num_inputs,neurons[0])
+        self.lin2 = nn.Linear(neurons[0],neurons[1])
+        if num_layers == 3:
+            self.lin3 = nn.Linear(neurons[1],neurons[2])
         
-        self.optimizer = torch.optim.Adam(self.ANN_relu.parameters(),lr=learn_rate)
+        self.optimizer = torch.optim.Adam(self.parameters(),lr=learn_rate)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,step_size=steps_to_update,
                                                             gamma=learn_rate_decay)
         logging.info(f"Neural network initialized.")
@@ -82,8 +67,12 @@ class DoubleQLearnerANN(nn.Module):
                 module.bias.data.zero_()
     
     def forward(self,x):
-        out = self.ANN_relu(DataLoader(x))
-        return out
+        x = F.relu(self.lin1(x))
+        x = F.relu(self.lin2(x))
+        if self.num_layers == 3:
+           x = F.relu(self.lin3(x)) 
+        
+        return x
     
     def get_lr(self):
         return self.optimizer.param_groups[0]['lr']
@@ -92,8 +81,7 @@ class DoubleQLearnerANN(nn.Module):
         try:
             batch_dataloader = DataLoader(batch_data,batch_size=batch_size)
 
-            # Set the module into training mode
-            self.ANN_relu.train()
+            # Increase count of train steps and perform model training
             self.train_step_count += 1
             for _ in range(epochs):
                 for batch,(X,y) in enumerate(batch_dataloader):
@@ -112,10 +100,12 @@ class DoubleQLearnerANN(nn.Module):
                     self.scheduler.step()
 
             # turn off training mode
-            self.ANN_relu.eval()
+            self.eval()
 
-            if (self.train_step_count % 1000 == 0):
-                avg_err = self.running_loss / self.train_step_count
+            if (self.train_step_count % 3000 == 0):
+                avg_err = self.running_loss / self.train_step_count / epochs / batch_size
+                # print(f"X={X}")
+                # print(f"y={y}")
                 print(f"Average batch error is = {avg_err} on train step #{self.train_step_count}.")
 
         except Exception as e:

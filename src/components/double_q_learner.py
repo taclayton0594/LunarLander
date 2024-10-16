@@ -20,11 +20,12 @@ class DoubleQLearner():
         self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
         self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
         self.Q_b_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
-        self.Q_a = self.Q_a_obj.ANN_relu
-        self.Q_b = self.Q_b_obj.ANN_relu
-        self.Q_a_target = self.Q_a_obj_target.ANN_relu
-        self.Q_b_target = self.Q_b_obj_target.ANN_relu
+        
+        # initialize weights
+        self.Q_a_obj.apply(self.Q_a_obj.initialize_weights)
+        self.Q_b_obj.apply(self.Q_b_obj.initialize_weights)
         self.updateTargetANNs()
+        
         self.num_actions = num_actions
         self.gamma = gamma
         self.eps = eps
@@ -57,8 +58,8 @@ class DoubleQLearner():
         return a
     
     def updateTargetANNs(self):
-        self.Q_a_target.load_state_dict(self.Q_a.state_dict())
-        self.Q_b_target.load_state_dict(self.Q_b.state_dict())
+        self.Q_a_obj_target.load_state_dict(self.Q_a_obj.state_dict())
+        self.Q_b_obj_target.load_state_dict(self.Q_b_obj.state_dict())
 
         logging.info("Target networks have been updated.")
 
@@ -66,25 +67,26 @@ class DoubleQLearner():
         try:
             # use input value to determine which net to use for target calcs
             if update_var < 0.5:
-                Q_1 = self.Q_a
-                Q_2 = self.Q_a_target #self.Q_b_target
+                Q_1 = self.Q_a_obj
+                Q_2 = self.Q_a_obj_target #self.Q_b_obj_target
             else:
                 print("should never get here")
-                Q_1 = self.Q_b
-                Q_2 = self.Q_a_target
+                Q_1 = self.Q_b_obj
+                Q_2 = self.Q_a_obj_target
 
             # Get the model outputs for each batch sample
             s_1_mat = states.clone().detach()
             s_2_mat = next_states.clone().detach()
+            Q_1_preds  = Q_1(s_1_mat).clone().detach()
             Q_2_preds = Q_2(s_2_mat).clone() # Predictions for state 2 (next state)
 
             # Get best actions 
-            a_1 = actions
-            a_2 = torch.argmax(Q_1(s_2_mat).clone(),dim=1)
+            a_1 = actions.clone().detach()
+            a_2 = torch.argmax(Q_2(s_2_mat).clone(),dim=1)
 
-            # Get prediction
-            Q_1_preds = Q_1(s_1_mat).clone().gather(1,a_1.view(self.batch_size,1)).view(self.batch_size) # Predictions using state 1 (previous state)
-
+            # Get prediction            
+            preds = Q_1_preds.gather(1,a_1.view(self.batch_size,1)).view(self.batch_size) # Predictions using state 1 (previous state)
+            
             # Extract other useful info from batch data
             rews = rewards.view(self.batch_size,1)
             done = done_bools.view(self.batch_size,1)
@@ -92,7 +94,7 @@ class DoubleQLearner():
             # Calculate targets for each batch sample
             targets = (rews + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)) * (1 - done.int())).view(self.batch_size)
 
-            return Q_1_preds,targets,a_1
+            return preds,targets,a_1
         
         except Exception as e:
             raise CustomException(e,sys)
@@ -101,6 +103,12 @@ class DoubleQLearner():
         try:
             # Get batch data for training
             states,next_states,actions,rewards,done_bools = self.replay_buffer.sample()
+
+            # Set to training mode
+            if update_var < 0.5:
+                self.Q_a_obj.train()
+            else:
+                self.Q_b_obj.train()
 
             # Get target matrix
             preds,targets,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)

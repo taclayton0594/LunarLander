@@ -19,7 +19,7 @@ class RLModelTrainer:
         self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
         self.max_steps = 1000
-        self.max_trials = 1500 
+        self.max_trials = 2500 
         self.rewards = np.empty((0,),dtype=float)
         self.experiment_num = 0
         self.trial_num = 0
@@ -29,12 +29,12 @@ class RLModelTrainer:
             "layer_1_neurons": [64],
             "layer_2_neurons": [64],
             "layer_3_neurons": [0],
-            "alpha": [0.001],
-            "alpha_decay": [0.999],
-            "eps_decay": [0.99], # epsilon will always start at 1
-            "buf_size": [20000], 
-            "batch_size": [32],
-            "target_update_steps": [25],
+            "alpha": [0.0001],
+            "alpha_decay": [1.0],
+            "eps_decay": [0.995], # epsilon will always start at 1
+            "buf_size": [100000], 
+            "batch_size": [64],
+            "target_update_steps": [25,1000],
             "batch_update_steps": [1]
         }
 
@@ -116,9 +116,9 @@ class RLModelTrainer:
 
                     # Get Q values array for state by which model will be updated (chosen at random)
                     if update_var < 0.5:
-                        Q = self.LunarLander.DoubleQLearner.Q_a(torch.tensor(self.LunarLander.curr_state[0]).to(device))
+                        Q = self.LunarLander.DoubleQLearner.Q_a_obj(torch.tensor(self.LunarLander.curr_state[0]).to(device))
                     else:
-                        Q = self.LunarLander.DoubleQLearner.Q_b(torch.tensor(self.LunarLander.curr_state[0]).to(device))
+                        Q = self.LunarLander.DoubleQLearner.Q_b_obj(torch.tensor(self.LunarLander.curr_state[0]).to(device))
 
                     # Get the next action (using and Epsilon Greedy policy)
                     a = self.LunarLander.DoubleQLearner.getBestActionEps(Q)
@@ -163,3 +163,6 @@ class RLModelTrainer:
 
             # Increment experiment number
             self.experiment_num = self.experiment_num + 1
+
+            # Log final performance
+            logging.info(f"Experiment {i+1}/{self.num_experiments} had final average reward of: {np.sum(self.rewards[-100:]) / 100.0}")
