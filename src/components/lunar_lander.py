@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import gym
+import torch
 from torch import nn
 from src.exception import CustomException
 from src.logger import logging
@@ -93,7 +94,7 @@ class LunarLander():
             raise CustomException(e,sys)
         
     def getBestAction(self,Q):
-        a = np.argmax(Q)
+        a = torch.argmax(Q)
             
         return a
 
@@ -103,7 +104,7 @@ class LunarLander():
         if eps_check <= self.eps:
             a = np.random.randint(0,self.num_actions)
         else:
-            a = np.argmax(Q)
+            a = torch.argmax(Q)
             
         return a
 
