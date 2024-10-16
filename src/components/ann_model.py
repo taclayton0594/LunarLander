@@ -42,6 +42,7 @@ class DoubleQLearnerANN(nn.Module):
         self.lin2 = nn.Linear(neurons[0],neurons[1])
         if num_layers == 3:
             self.lin3 = nn.Linear(neurons[1],neurons[2])
+        self.out = nn.Linear(neurons[num_layers-1],num_outputs)
         
         self.optimizer = torch.optim.Adam(self.parameters(),lr=learn_rate)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,step_size=steps_to_update,
@@ -72,7 +73,7 @@ class DoubleQLearnerANN(nn.Module):
         if self.num_layers == 3:
            x = F.relu(self.lin3(x)) 
         
-        return x
+        return self.out(x)
     
     def get_lr(self):
         return self.optimizer.param_groups[0]['lr']

@@ -15,7 +15,7 @@ This freezing of target nets allows for more stable training.
 '''
 class DoubleQLearner():
     def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),num_actions=4,buf_size=50000,batch_size=32,
-                 alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99,eps=1.0):
+                 alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99):
         self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
         self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
         self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
@@ -28,7 +28,6 @@ class DoubleQLearner():
         
         self.num_actions = num_actions
         self.gamma = gamma
-        self.eps = eps
         self.batch_size = batch_size
         self.replay_buffer = ReplayBuffer(buf_size,batch_size)
         logging.info(f"Double Q-Learner has been created.")
@@ -38,24 +37,8 @@ class DoubleQLearner():
         return (
             f'Double Q-Learner with the following parameters:{n1}'
             f'gamma = {self.gamma}{n1}'
-            f'eps = {self.eps}{n1}'
             f'batch_size = {self.batch_size}{n1}'
             )
-    
-    def getBestAction(self,Q):
-        a = torch.argmax(Q)
-            
-        return a
-
-    def getBestActionEps(self,Q):
-        eps_check = np.random.random()
-            
-        if eps_check <= self.eps:
-            a = np.random.randint(0,self.num_actions)
-        else:
-            a = np.argmax(Q)
-            
-        return a
     
     def updateTargetANNs(self):
         self.Q_a_obj_target.load_state_dict(self.Q_a_obj.state_dict())

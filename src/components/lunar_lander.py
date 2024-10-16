@@ -91,6 +91,21 @@ class LunarLander():
         
         except Exception as e:
             raise CustomException(e,sys)
+        
+    def getBestAction(self,Q):
+        a = np.argmax(Q)
+            
+        return a
+
+    def getBestActionEps(self,Q):
+        eps_check = np.random.random()
+            
+        if eps_check <= self.eps:
+            a = np.random.randint(0,self.num_actions)
+        else:
+            a = np.argmax(Q)
+            
+        return a
 
     def UpdateEpsilon(self):
         eps_new = self.eps * self.eps_decay

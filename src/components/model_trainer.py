@@ -121,7 +121,7 @@ class RLModelTrainer:
                         Q = self.LunarLander.DoubleQLearner.Q_b_obj(torch.tensor(self.LunarLander.curr_state[0]).to(device))
 
                     # Get the next action (using and Epsilon Greedy policy)
-                    a = self.LunarLander.DoubleQLearner.getBestActionEps(Q)
+                    a = self.LunarLander.getBestActionEps(Q)
 
                     # Take a step and store relevant information
                     _, _, _, reward, done = self.LunarLander.EnvironmentStep(a)
