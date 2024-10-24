@@ -1,7 +1,7 @@
 import sys
-import numpy as np
 import torch
 from torch import nn
+from torch.utils.data import DataLoader
 from src.exception import CustomException
 from src.logger import logging
 from src.components.ann_model import DoubleQLearnerANN
@@ -15,21 +15,20 @@ This freezing of target nets allows for more stable training.
 '''
 class DoubleQLearner():
     def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),num_actions=4,buf_size=50000,batch_size=32,
-                 alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99):
+                 alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99,tau=0.01):
         self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
-        self.Q_b_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
         self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
-        self.Q_b_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
         
-        # initialize weights
-        self.Q_a_obj.apply(self.Q_a_obj.initialize_weights)
-        self.Q_b_obj.apply(self.Q_b_obj.initialize_weights)
-        self.updateTargetANNs()
+        # # initialize weights
+        # self.Q_a_obj.apply(self.initialize_weights)
+        # # self.updateTargetANNs()
+        # self.Q_a_obj_target.apply(self.initialize_weights)
         
         self.num_actions = num_actions
         self.gamma = gamma
         self.batch_size = batch_size
         self.replay_buffer = ReplayBuffer(buf_size,batch_size)
+        self.tau = tau
         logging.info(f"Double Q-Learner has been created.")
 
     def __str__(self):
@@ -40,73 +39,114 @@ class DoubleQLearner():
             f'batch_size = {self.batch_size}{n1}'
             )
     
-    def updateTargetANNs(self):
-        self.Q_a_obj_target.load_state_dict(self.Q_a_obj.state_dict())
-        self.Q_b_obj_target.load_state_dict(self.Q_b_obj.state_dict())
+    def initialize_weights(self,module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.xavier_uniform_(module.weight)
+            if module.bias is not None:
+                module.bias.data.zero_()
+    
+    def updateTargetANNs(self,main,target,copy_weights=False):
+        if copy_weights:
+            self.Q_a_obj_target.load_state_dict(self.Q_a_obj.state_dict())
+            logging.info("Target networks have been updated.")
+        else:
+            for target_weights, main_weights in zip(target.parameters(),main.parameters()):
+                target_weights.data.copy_(self.tau*main_weights + (1-self.tau)*target_weights)
 
-        logging.info("Target networks have been updated.")
-
-    def get_targets(self,update_var,states,next_states,actions,rewards,done_bools):
+    def get_targets(self,next_states,rewards,done_bools):
         try:
-            # use input value to determine which net to use for target calcs
-            if update_var < 0.5:
-                Q_1 = self.Q_a_obj
-                Q_2 = self.Q_a_obj_target #self.Q_b_obj_target
-            else:
-                print("should never get here")
-                Q_1 = self.Q_b_obj
-                Q_2 = self.Q_a_obj_target
+            # Get main and target nets
+            Q_2 = self.Q_a_obj_target
 
             # Get the model outputs for each batch sample
-            s_1_mat = states.clone().detach()
-            s_2_mat = next_states.clone().detach()
-            Q_1_preds  = Q_1(s_1_mat).clone().detach()
-            Q_2_preds = Q_2(s_2_mat).clone() # Predictions for state 2 (next state)
+            s_2_mat = next_states
+            Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
+            # Q_2_next = Q_1(s_2_mat).clone()
+            # Q_2_next_targ = Q_2(s_2_mat).clone()
 
             # Get best actions 
-            a_1 = actions.clone().detach()
-            a_2 = torch.argmax(Q_2(s_2_mat).clone(),dim=1)
+            a_2 = torch.argmax(Q_2_preds,dim=1)
+            # a_2 = torch.argmax(Q_2_next,dim=1)
+            # a_2_targ = torch.argmax(Q_2_next_targ,dim=1)
 
-            # Get prediction            
-            preds = Q_1_preds.gather(1,a_1.view(self.batch_size,1)).view(self.batch_size) # Predictions using state 1 (previous state)
-            
+            # Predictions using state 1 (previous state)           
+            # preds = Q_1_preds
+
+            # Get min Q value for clipped double q learning
+            # Q_next = Q_2_next.gather(1,a_2.view(self.batch_size,1)).view(self.batch_size)
+            # Q_next_targ = Q_2_next_targ.gather(1,a_2_targ.view(self.batch_size,1)).view(self.batch_size)
+            # Q_min = torch.min(Q_next,Q_next_targ)
+
             # Extract other useful info from batch data
-            rews = rewards.view(self.batch_size,1)
-            done = done_bools.view(self.batch_size,1)
+            rews = rewards.view(self.batch_size)
+            done = done_bools.int().view(self.batch_size)
 
             # Calculate targets for each batch sample
-            targets = (rews + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)) * (1 - done.int())).view(self.batch_size)
+            targets = rews + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)).view(self.batch_size) * (1 - done)
+            # targets = rews + self.gamma * Q_min * (1 - done)
 
-            return preds,targets,a_1
+            return targets
         
         except Exception as e:
             raise CustomException(e,sys)
         
-    def train_ANNs(self,update_var,epochs=1):
+    def train_ANNs(self,epochs=1):
         try:
             # Get batch data for training
             states,next_states,actions,rewards,done_bools = self.replay_buffer.sample()
 
             # Set to training mode
-            if update_var < 0.5:
-                self.Q_a_obj.train()
-            else:
-                self.Q_b_obj.train()
+            self.Q_a_obj.train() # not necessary but good practice when adding batch norm and other layers
 
             # Get target matrix
-            preds,targets,_ = self.get_targets(update_var,states,next_states,actions,rewards,done_bools)
+            targets = self.get_targets(next_states,rewards,done_bools)
             
             # Convert data to Torch Dataset
-            train_data = LunarLanderDataset(preds,targets)
+            train_data = LunarLanderDataset(states,targets)
 
-            # Train ANNs
-            if update_var < 0.5:
-                # Set the module into training mode
-                self.Q_a_obj.train_q_learner(train_data,self.batch_size)
-            else:
-                # Set the module into training mode
-                self.Q_b_obj.train_q_learner(train_data,self.batch_size)
+            # Train ANN
+            self.train_q_learner(actions,train_data,self.batch_size,epochs)
 
+        except Exception as e:
+            raise CustomException(e,sys)
+        
+    def get_lr(self):
+        return self.Q_a_obj.optimizer.param_groups[0]['lr']
+        
+    def train_q_learner(self,actions,batch_data,batch_size,epochs=1):
+        try:
+            batch_dataloader = DataLoader(batch_data,batch_size=batch_size)
+
+            # Increase count of train steps and perform model training
+            self.Q_a_obj.train_step_count += 1
+            for _ in range(epochs):
+                for batch,(X,y) in enumerate(batch_dataloader):
+                    # Get predictions
+                    preds = self.Q_a_obj(X).gather(1,actions.view(batch_size,1)).view(batch_size)
+
+                    # Compute prediction error
+                    loss = self.Q_a_obj.loss_fcn(preds,y)
+                    self.Q_a_obj.running_loss += loss
+
+                    # Clear gradients before each step
+                    self.Q_a_obj.optimizer.zero_grad()
+
+                    # Backpropagation
+                    loss.backward()
+                    # loss.backward(retain_graph=True)
+                    self.Q_a_obj.optimizer.step()     
+
+                if self.get_lr() > self.Q_a_obj.learn_rate_min:
+                    self.Q_a_obj.scheduler.step()
+
+            # turn off training mode - not necessary
+            self.Q_a_obj.eval()
+
+            if (self.Q_a_obj.train_step_count % 5000 == 0):
+                avg_err = self.Q_a_obj.running_loss / self.Q_a_obj.train_step_count / epochs / batch_size
+                print(f"X={X}")
+                print(f"y={y}")
+                print(f"Average batch error is = {avg_err} on train step #{self.Q_a_obj.train_step_count}.")
 
         except Exception as e:
             raise CustomException(e,sys)

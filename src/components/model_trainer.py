@@ -18,23 +18,23 @@ class RLModelTrainer:
     def __init__(self):
         self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
-        self.max_steps = 1000
-        self.max_trials = 2500 
+        self.max_steps = 350
+        self.max_trials = 5000 
         self.rewards = np.empty((0,),dtype=float)
         self.experiment_num = 0
         self.trial_num = 0
 
     def set_model_hyperparameters(self):
         params = {
-            "layer_1_neurons": [64],
-            "layer_2_neurons": [64],
+            "layer_1_neurons": [32],
+            "layer_2_neurons": [32],
             "layer_3_neurons": [0],
             "alpha": [0.0001],
-            "alpha_decay": [1.0],
-            "eps_decay": [0.995], # epsilon will always start at 1
+            "alpha_decay": [1],
+            "eps_decay": [0.9991], # epsilon will always start at 1
             "buf_size": [100000], 
             "batch_size": [64],
-            "target_update_steps": [25,1000],
+            "target_update_steps": [1],
             "batch_update_steps": [1]
         }
 
@@ -111,14 +111,8 @@ class RLModelTrainer:
 
                 # Run until the experiment ends or max steps hit
                 while True:
-                    # Determine which matrix to update
-                    update_var = 0 #np.random.random()
-
-                    # Get Q values array for state by which model will be updated (chosen at random)
-                    if update_var < 0.5:
-                        Q = self.LunarLander.DoubleQLearner.Q_a_obj(torch.tensor(self.LunarLander.curr_state[0]).to(device))
-                    else:
-                        Q = self.LunarLander.DoubleQLearner.Q_b_obj(torch.tensor(self.LunarLander.curr_state[0]).to(device))
+                    # Get Q values array for state 
+                    Q = self.LunarLander.DoubleQLearner.Q_a_obj(torch.tensor(self.LunarLander.curr_state[0]).to(device))
 
                     # Get the next action (using and Epsilon Greedy policy)
                     a = self.LunarLander.getBestActionEps(Q)
@@ -133,7 +127,7 @@ class RLModelTrainer:
                     curr_buf_size = self.LunarLander.DoubleQLearner.replay_buffer.size
                     if ((self.LunarLander.tot_step_count % self.batch_update_steps == 0) and 
                         curr_buf_size >= self.LunarLander.min_buf_size):
-                        self.LunarLander.DoubleQLearner.train_ANNs(update_var)
+                        self.LunarLander.DoubleQLearner.train_ANNs()
 
                     # End the episode if the epoch is done or the max number of steps have been taken
                     if (self.LunarLander.eps_step_count >= self.max_steps) or done:
@@ -145,7 +139,9 @@ class RLModelTrainer:
                     # Update target ANNs if counter hit
                     if ((self.LunarLander.tot_step_count % self.target_update_steps == 0) and
                         (curr_buf_size >= self.LunarLander.min_buf_size)):
-                        self.LunarLander.DoubleQLearner.updateTargetANNs()
+                        # self.LunarLander.DoubleQLearner.updateTargetANNs()
+                        self.LunarLander.DoubleQLearner.updateTargetANNs(self.LunarLander.DoubleQLearner.Q_a_obj,
+                                                                            self.LunarLander.DoubleQLearner.Q_a_obj_target)
 
                 # Update Epsilon
                 if (curr_buf_size >= self.LunarLander.min_buf_size):
@@ -153,7 +149,6 @@ class RLModelTrainer:
 
                 if (j+1) % 10 == 0:
                     print(f"alpha_a = {self.LunarLander.DoubleQLearner.Q_a_obj.get_lr()}")
-                    print(f"alpha_b = {self.LunarLander.DoubleQLearner.Q_b_obj.get_lr()}")
                     print(f"epsilon = {self.LunarLander.eps}") 
 
                     self.printPerformance()

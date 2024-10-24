@@ -1,15 +1,14 @@
 import sys
 import numpy as np
 import gym
-import torch
 from torch import nn
 from src.exception import CustomException
 from src.logger import logging
 from src.components.double_q_learner import DoubleQLearner
 
 class LunarLander():
-    def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-6,gamma=0.99,eps=1,eps_decay=0.992,
-                 buf_size=2048,min_buf_size=256,batch_size=32,eps_min=0.01,num_states=8,
+    def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-6,gamma=1.0,eps=1,eps_decay=0.992,
+                 buf_size=2048,min_buf_size=64,batch_size=32,eps_min=0.01,num_states=8,
                  num_actions=4):
         self.alpha = alpha
         self.alpha_init = alpha
@@ -45,7 +44,7 @@ class LunarLander():
             f'batch_size: {self.batch_size}{n1}'
             )
     
-    def CreateQLearner(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss):
+    def CreateQLearner(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss()):
         try:
             self.DoubleQLearner = DoubleQLearner(num_layers,neurons,num_inputs,loss,self.num_actions,self.buf_size,
                                                  self.batch_size,self.alpha,self.alpha_decay,self.alpha_min,self.gamma)
@@ -94,7 +93,7 @@ class LunarLander():
             raise CustomException(e,sys)
         
     def getBestAction(self,Q):
-        a = torch.argmax(Q)
+        a = np.argmax(Q.detach().numpy())
             
         return a
 
@@ -104,7 +103,7 @@ class LunarLander():
         if eps_check <= self.eps:
             a = np.random.randint(0,self.num_actions)
         else:
-            a = torch.argmax(Q)
+            a = np.argmax(Q.detach().numpy())
             
         return a
 
