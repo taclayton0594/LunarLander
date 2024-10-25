@@ -60,7 +60,8 @@ class DoubleQLearner():
 
             # Get the model outputs for each batch sample
             s_2_mat = next_states
-            Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
+            with torch.no_grad(): # save memory usage and time by not saving gradient info
+                Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
             # Q_2_next = Q_1(s_2_mat).clone()
             # Q_2_next_targ = Q_2(s_2_mat).clone()
 
@@ -144,7 +145,7 @@ class DoubleQLearner():
 
             if (self.Q_a_obj.train_step_count % 5000 == 0):
                 avg_err = self.Q_a_obj.running_loss / self.Q_a_obj.train_step_count / epochs / batch_size
-                print(f"X={X}")
+                print(f"X={preds}")
                 print(f"y={y}")
                 print(f"Average batch error is = {avg_err} on train step #{self.Q_a_obj.train_step_count}.")
 
