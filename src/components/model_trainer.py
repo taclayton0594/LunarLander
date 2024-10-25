@@ -31,7 +31,7 @@ class RLModelTrainer:
             "layer_3_neurons": [0],
             "alpha": [0.00001],
             "alpha_decay": [1],
-            "eps_decay": [0.993], # epsilon will always start at 1
+            "eps_decay": [0.995], # epsilon will always start at 1
             "buf_size": [100000], 
             "batch_size": [64],
             "target_update_steps": [1],
@@ -112,7 +112,8 @@ class RLModelTrainer:
                 # Run until the experiment ends or max steps hit
                 while True:
                     # Get Q values array for state 
-                    Q = self.LunarLander.DoubleQLearner.Q_a_obj(torch.tensor(self.LunarLander.curr_state[0]).to(device))
+                    with torch.no_grad():
+                        Q = self.LunarLander.DoubleQLearner.Q_a_obj(torch.tensor(self.LunarLander.curr_state[0]).to(device))
 
                     # Get the next action (using and Epsilon Greedy policy)
                     a = self.LunarLander.getBestActionEps(Q)
