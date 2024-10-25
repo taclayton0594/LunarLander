@@ -148,7 +148,7 @@ class RLModelTrainer:
                     self.LunarLander.UpdateEpsilon()  
 
                 if (j+1) % 10 == 0:
-                    print(f"alpha_a = {self.LunarLander.DoubleQLearner.Q_a_obj.get_lr()}")
+                    print(f"alpha_a = {self.LunarLander.DoubleQLearner.get_lr()}")
                     print(f"epsilon = {self.LunarLander.eps}") 
 
                     self.printPerformance()
