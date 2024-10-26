@@ -1,5 +1,4 @@
 import os
-import sys
 import numpy as np
 from dataclasses import dataclass
 import torch
@@ -9,18 +8,13 @@ from src.logger import logging
 from src.utils import save_object,setup_lunar_lander_grid
 from src.components.lunar_lander import LunarLander
 from src.components.ann_model import device
-
-@dataclass
-class RLModelTrainerConfig:
-    best_model_file_path = os.path.join('artifacts',"best_model.pkl")
+from datetime import datetime
 
 class RLModelTrainer:
     def __init__(self):
-        self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
         self.max_steps = 700
         self.max_trials = 5000 
-        self.rewards = np.empty((0,),dtype=float)
         self.experiment_num = 0
         self.trial_num = 0
 
@@ -31,7 +25,7 @@ class RLModelTrainer:
             "layer_3_neurons": [0],
             "alpha": [0.00001],
             "alpha_decay": [1],
-            "eps_decay": [0.995], # epsilon will always start at 1
+            "eps_decay": [0.999], # epsilon will always start at 1
             "buf_size": [100000], 
             "batch_size": [64],
             "target_update_steps": [1],
@@ -42,6 +36,20 @@ class RLModelTrainer:
     
     def get_hyperparameter_grid(self):
         self.grid,self.num_experiments = setup_lunar_lander_grid(self.set_model_hyperparameters())
+
+        # Initialize rewards mat now that know the number of experiments
+        self.rewards = np.zeros((self.num_experiments,self.max_trials),dtype=float)
+
+        # Get date string 
+        current_datetime = datetime.now()
+        date_object = datetime.strptime(current_datetime, "%d/%m/%Y %H:%M")
+
+        # Save experiment info
+        self.file_date_str = date_object.strftime("%d_%m_%Y_%H_%M")
+        file_name = f'Experiment_{self.file_date_str}'
+        file_path = os.path.join("artifacts",file_name)
+        obj = (self.grid,self.num_experiments)
+        save_object(file_path,obj)
 
     def initialize_Q_Learner(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss):
         self.LunarLander.CreateQLearner(num_layers,neurons)
@@ -80,17 +88,22 @@ class RLModelTrainer:
         # Create Double Q learner
         self.initialize_Q_Learner(num_layers,neurons)
 
-    def printPerformance(self):
+    def print_performance(self):
         # calculate 100pt moving average of rewards
         if self.trial_num <= 100:
-            mov_avg = np.sum(self.rewards[-(self.trial_num-1):]) / self.trial_num
+            mov_avg = np.sum(self.rewards[self.experiment_num][-(self.trial_num-1):]) / self.trial_num
         else:
-            mov_avg = np.sum(self.rewards[-100:]) / 100.0
+            mov_avg = np.sum(self.rewards[self.experiment_num][-100:]) / 100.0
 
         str_out = f"The 100 trial moving average is {mov_avg} at trial {self.trial_num} of experiment {self.experiment_num+1}."
         print(str_out)
         logging.info(str_out)
 
+    def save_experiment_rewards(self):
+        file_name = f"exp_rewards_{self.file_date_str}.pkl"
+        file_path = os.path.join("artifacts",file_name)
+        obj = self.rewards
+        save_object(file_path,obj)
 
     def start_RL_training(self):
         # Initialize the grid of hyperparameters for each experiment
@@ -134,7 +147,7 @@ class RLModelTrainer:
                     if (self.LunarLander.eps_step_count >= self.max_steps) or done:
                         logging.info(f"Trial {j+1}/{self.max_trials} of experiment {i+1}/{self.num_experiments} ended with a reward of: {self.LunarLander.reward}")
                         print(f"The final reward of trial {j+1}/{self.max_trials}: {self.LunarLander.reward}.")  
-                        self.rewards = np.append(self.rewards,np.expand_dims(self.LunarLander.reward,axis=0),axis=0)
+                        self.rewards[i][j] = self.LunarLander.reward
                         break
 
                     # Update target ANNs if counter hit
@@ -152,7 +165,7 @@ class RLModelTrainer:
                     print(f"alpha_a = {self.LunarLander.DoubleQLearner.get_lr()}")
                     print(f"epsilon = {self.LunarLander.eps}") 
 
-                    self.printPerformance()
+                    self.print_performance()
 
                 # Increment trial number
                 self.trial_num = self.trial_num + 1
@@ -161,4 +174,7 @@ class RLModelTrainer:
             self.experiment_num = self.experiment_num + 1
 
             # Log final performance
-            logging.info(f"Experiment {i+1}/{self.num_experiments} had final average reward of: {np.sum(self.rewards[-100:]) / 100.0}")
+            logging.info(f"Experiment {i+1}/{self.num_experiments} had final average reward of: {np.sum(self.rewards[i][-100:]) / 100.0}")
+
+        # Save the results array 
+        self.save_experiment_rewards()
