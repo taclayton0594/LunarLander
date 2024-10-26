@@ -8,7 +8,7 @@ from src.components.double_q_learner import DoubleQLearner
 
 class LunarLander():
     def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-6,gamma=1.0,eps=1,eps_decay=0.992,
-                 buf_size=2048,min_buf_size=5000,batch_size=32,eps_min=0.01,num_states=8,
+                 buf_size=2048,min_buf_size=1000,batch_size=32,eps_min=0.01,num_states=8,
                  num_actions=4):
         self.alpha = alpha
         self.alpha_init = alpha
@@ -93,7 +93,7 @@ class LunarLander():
             raise CustomException(e,sys)
         
     def getBestAction(self,Q):
-        a = np.argmax(Q.detach().numpy())
+        a = np.argmax(Q.cpu().detach().numpy())
             
         return a
 
@@ -103,7 +103,7 @@ class LunarLander():
         if eps_check <= self.eps:
             a = np.random.randint(0,self.num_actions)
         else:
-            a = np.argmax(Q.detach().numpy())
+            a = np.argmax(Q.cpu().detach().numpy())
             
         return a
 

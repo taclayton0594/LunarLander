@@ -8,7 +8,9 @@ from src.components.ann_model import DoubleQLearnerANN
 from src.components.replay_buffer import ReplayBuffer
 from src.components.custom_data import LunarLanderDataset
 from src.components.ann_model import device
-import psutil
+
+# disable backends to prevent maxing RAM usage
+# torch.backends.cudnn.enabled = False
 
 '''
 This main class for the RL Double Q-Learner. On initialization, 4 neural networks will be created, 2 for 2 nets used in double Q
@@ -62,25 +64,15 @@ class DoubleQLearner():
 
     def get_targets(self,next_states,rewards,done_bools):
         try:
-            # Get main and target nets
-            Q_2 = self.Q_a_obj_target
-
             # Get the model outputs for each batch sample
-            s_2_mat = next_states
             with torch.no_grad(): # save memory usage and time by not saving gradient info
-                Q_2_preds = Q_2(s_2_mat) # Predictions for state 2 (next state)
-            # Q_2_next = Q_1(s_2_mat).clone()
-            # Q_2_next_targ = Q_2(s_2_mat).clone()
+                Q_2_preds = self.Q_a_obj_target(next_states).to(device) # Predictions for state 2 (next state)
 
             # Get best actions 
-            a_2 = torch.argmax(Q_2_preds,dim=1)
-
-            # Extract other useful info from batch data
-            rews = rewards.view(self.batch_size)
-            done = done_bools.int().view(self.batch_size)
+            a_2 = torch.argmax(Q_2_preds,dim=1).to(device)
 
             # Calculate targets for each batch sample
-            targets = rews + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)).view(self.batch_size) * (1 - done)
+            targets = rewards + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)).view(self.batch_size).detach() * (1 - done_bools.int())
 
             return targets
         
@@ -97,15 +89,12 @@ class DoubleQLearner():
 
             # Get target matrix
             targets = self.get_targets(next_states,rewards,done_bools)
-            
+
             # Convert data to Torch Dataset
             train_data = LunarLanderDataset(states,targets)
 
             # Train ANN
             self.train_q_learner(actions,train_data,self.batch_size,epochs)
-
-            del states,next_states,actions,rewards,done_bools,targets,train_data
-
         except Exception as e:
             raise CustomException(e,sys)
         
@@ -114,7 +103,7 @@ class DoubleQLearner():
         
     def train_q_learner(self,actions,batch_data,batch_size,epochs=1):
         try:
-            batch_dataloader = DataLoader(batch_data,batch_size=batch_size)
+            batch_dataloader = DataLoader(batch_data,batch_size=batch_size,num_workers=0)
 
             # Increase count of train steps and perform model training
             self.Q_a_obj.train_step_count += 1
@@ -127,7 +116,7 @@ class DoubleQLearner():
 
                     # Compute prediction error
                     loss = self.Q_a_obj.loss_fcn(preds,y)
-                    self.Q_a_obj.running_loss += loss
+                    self.Q_a_obj.running_loss += loss.detach()
 
                     # Clear gradients before each step
                     self.Q_a_obj.optimizer.zero_grad()
@@ -148,8 +137,6 @@ class DoubleQLearner():
                 print(f"X={preds}")
                 print(f"y={y}")
                 print(f"Average batch error is = {avg_err} on train step #{self.Q_a_obj.train_step_count}.")
-
-            del loss,preds,X,y,batch_dataloader
 
         except Exception as e:
             raise CustomException(e,sys)

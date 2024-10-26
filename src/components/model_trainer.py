@@ -18,7 +18,7 @@ class RLModelTrainer:
     def __init__(self):
         self.model_trainer_config = RLModelTrainerConfig()
         self.LunarLander = LunarLander()
-        self.max_steps = 350
+        self.max_steps = 700
         self.max_trials = 5000 
         self.rewards = np.empty((0,),dtype=float)
         self.experiment_num = 0
