@@ -7,6 +7,8 @@ from src.logger import logging
 from src.components.ann_model import DoubleQLearnerANN
 from src.components.replay_buffer import ReplayBuffer
 from src.components.custom_data import LunarLanderDataset
+from src.components.ann_model import device
+import psutil
 
 '''
 This main class for the RL Double Q-Learner. On initialization, 4 neural networks will be created, 2 for 2 nets used in double Q
@@ -16,9 +18,10 @@ This freezing of target nets allows for more stable training.
 class DoubleQLearner():
     def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),num_actions=4,buf_size=50000,batch_size=32,
                  alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99,tau=0.01):
-        self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
-        self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min)
-        
+        self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min).to(device)
+        self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min).to(device)
+        self.no_gradient_model() # tell Pytorch not to compute gradients for target model
+
         # # initialize weights
         # self.Q_a_obj.apply(self.initialize_weights)
         # # self.updateTargetANNs()
@@ -44,6 +47,10 @@ class DoubleQLearner():
             torch.nn.init.xavier_uniform_(module.weight)
             if module.bias is not None:
                 module.bias.data.zero_()
+
+    def no_gradient_model(self):
+        for p in self.Q_a_obj_target.parameters():
+            p.requires_grad_(False)
     
     def updateTargetANNs(self,main,target,copy_weights=False):
         if copy_weights:
@@ -67,16 +74,6 @@ class DoubleQLearner():
 
             # Get best actions 
             a_2 = torch.argmax(Q_2_preds,dim=1)
-            # a_2 = torch.argmax(Q_2_next,dim=1)
-            # a_2_targ = torch.argmax(Q_2_next_targ,dim=1)
-
-            # Predictions using state 1 (previous state)           
-            # preds = Q_1_preds
-
-            # Get min Q value for clipped double q learning
-            # Q_next = Q_2_next.gather(1,a_2.view(self.batch_size,1)).view(self.batch_size)
-            # Q_next_targ = Q_2_next_targ.gather(1,a_2_targ.view(self.batch_size,1)).view(self.batch_size)
-            # Q_min = torch.min(Q_next,Q_next_targ)
 
             # Extract other useful info from batch data
             rews = rewards.view(self.batch_size)
@@ -84,7 +81,6 @@ class DoubleQLearner():
 
             # Calculate targets for each batch sample
             targets = rews + self.gamma * Q_2_preds[:].gather(1,a_2.view(self.batch_size,1)).view(self.batch_size) * (1 - done)
-            # targets = rews + self.gamma * Q_min * (1 - done)
 
             return targets
         
@@ -108,6 +104,8 @@ class DoubleQLearner():
             # Train ANN
             self.train_q_learner(actions,train_data,self.batch_size,epochs)
 
+            del states,next_states,actions,rewards,done_bools,targets,train_data
+
         except Exception as e:
             raise CustomException(e,sys)
         
@@ -122,6 +120,8 @@ class DoubleQLearner():
             self.Q_a_obj.train_step_count += 1
             for _ in range(epochs):
                 for batch,(X,y) in enumerate(batch_dataloader):
+                    X = X.to(device)
+                    y = y.to(device)
                     # Get predictions
                     preds = self.Q_a_obj(X).gather(1,actions.view(batch_size,1)).view(batch_size)
 
@@ -148,6 +148,8 @@ class DoubleQLearner():
                 print(f"X={preds}")
                 print(f"y={y}")
                 print(f"Average batch error is = {avg_err} on train step #{self.Q_a_obj.train_step_count}.")
+
+            del loss,preds,X,y,batch_dataloader
 
         except Exception as e:
             raise CustomException(e,sys)

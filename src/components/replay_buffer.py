@@ -51,7 +51,7 @@ class ReplayBuffer:
             done_bools = torch.zeros(self.batch_size,dtype=bool,device=device)
 
             # Get random batch sample indeces
-            inds = np.random.choice(self.size,size=self.batch_size) 
+            inds = np.random.choice(self.size,size=self.batch_size)
 
             # populate minibatch
             for i in range(self.batch_size):

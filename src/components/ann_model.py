@@ -4,14 +4,14 @@ from src.logger import logging
 import torch.nn.functional as F
 
 # Get cpu, gpu or mps device for training.
-device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
-)
-# device = "cpu"
+# device = (
+#     "cuda"
+#     if torch.cuda.is_available()
+#     else "mps"
+#     if torch.backends.mps.is_available()
+#     else "cpu"
+# )
+device = "cpu"
 logging.info(f"Using {device} device for neural network training.")
 
 torch.autograd.set_detect_anomaly(True)
