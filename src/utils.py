@@ -1,11 +1,18 @@
 import os
 import sys
 import numpy as np
+import torch
+import random
 import pandas as pd
 from src.exception import CustomException
 from src.logger import logging
 import dill
 from sklearn.model_selection import ParameterGrid
+
+# Globally seed numpy and torch (abd other sources of randomness)
+np.random.seed(0)
+torch.manual_seed(0)
+random.seed(0)
 
 def save_object(file_path,obj):
     try:

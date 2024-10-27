@@ -23,9 +23,9 @@ class RLModelTrainer:
             "layer_1_neurons": [32],
             "layer_2_neurons": [32],
             "layer_3_neurons": [0],
-            "alpha": [0.00001],
-            "alpha_decay": [1],
-            "eps_decay": [0.996], # epsilon will always start at 1
+            "alpha": [0.0001],
+            "alpha_decay": [0.998],
+            "eps_decay": [0.992], # epsilon will always start at 1
             "buf_size": [100000], 
             "batch_size": [64],
             "target_update_steps": [1],
@@ -91,10 +91,9 @@ class RLModelTrainer:
     def print_performance(self):
         # calculate 100pt moving average of rewards
         if self.trial_num <= 100:
-            mov_avg = np.sum(self.rewards[self.experiment_num][-(self.trial_num-1):]) / self.trial_num
-            print(mov_avg)
+            mov_avg = np.sum(self.rewards[self.experiment_num][0:self.trial_num-1]) / self.trial_num
         else:
-            mov_avg = np.sum(self.rewards[self.experiment_num][-100:]) / 100.0
+            mov_avg = np.sum(self.rewards[self.experiment_num][(self.trial_num-100):self.trial_num-1]) / 100.0
 
         str_out = f"The 100 trial moving average is {mov_avg} at trial {self.trial_num} of experiment {self.experiment_num+1}."
         print(str_out)
@@ -151,15 +150,15 @@ class RLModelTrainer:
                         logging.info(f"Trial {j+1}/{self.max_trials} of experiment {i+1}/{self.num_experiments} ended with a reward of: {self.LunarLander.reward}")
                         print(f"The final reward of trial {j+1}/{self.max_trials}: {self.LunarLander.reward}.")  
                         self.rewards[i][j] = self.LunarLander.reward
-                        print(self.rewards[i][j])
+
                         break
 
-                    # # Update target ANNs if counter hit
-                    # if ((self.LunarLander.tot_step_count % self.target_update_steps == 0) and
-                    #     (curr_buf_size >= self.LunarLander.min_buf_size)):
-                    #     # self.LunarLander.DoubleQLearner.updateTargetANNs()
-                    #     self.LunarLander.DoubleQLearner.updateTargetANNs(self.LunarLander.DoubleQLearner.Q_a_obj,
-                    #                                                         self.LunarLander.DoubleQLearner.Q_a_obj_target)
+                    # Update target ANNs if counter hit
+                    if ((self.LunarLander.tot_step_count % self.target_update_steps == 0) and
+                        (curr_buf_size >= self.LunarLander.min_buf_size)):
+                        # self.LunarLander.DoubleQLearner.updateTargetANNs()
+                        self.LunarLander.DoubleQLearner.updateTargetANNs(self.LunarLander.DoubleQLearner.Q_a_obj,
+                                                                            self.LunarLander.DoubleQLearner.Q_a_obj_target)
 
                 # Update Epsilon
                 if (curr_buf_size >= self.LunarLander.min_buf_size):
@@ -178,7 +177,7 @@ class RLModelTrainer:
             self.experiment_num = self.experiment_num + 1
 
             # Log final performance
-            logging.info(f"Experiment {i+1}/{self.num_experiments} had final average reward of: {np.sum(self.rewards[i][-100:]) / 100.0}")
+            logging.info(f"Experiment {i+1}/{self.num_experiments} had final average reward of: {np.sum(self.rewards[i][(self.trial_num-100):self.trial_num-1]) / 100.0}")
 
         # Save the results array 
         self.save_experiment_rewards()

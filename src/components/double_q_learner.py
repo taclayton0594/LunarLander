@@ -24,10 +24,10 @@ class DoubleQLearner():
         self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min).to(device)
         self.no_gradient_model() # tell Pytorch not to compute gradients for target model
 
-        # # initialize weights
-        # self.Q_a_obj.apply(self.initialize_weights)
-        # # self.updateTargetANNs()
-        # self.Q_a_obj_target.apply(self.initialize_weights)
+        # initialize weights
+        self.Q_a_obj.apply(self.initialize_weights)
+        # self.updateTargetANNs()
+        self.Q_a_obj_target.apply(self.initialize_weights)
         
         self.num_actions = num_actions
         self.gamma = gamma
@@ -66,7 +66,7 @@ class DoubleQLearner():
         try:
             # Get the model outputs for each batch sample
             with torch.no_grad(): # save memory usage and time by not saving gradient info
-                Q_2_preds = self.Q_a_obj(next_states).detach().to(device) # Predictions for state 2 (next state)
+                Q_2_preds = self.Q_a_obj_target(next_states).detach().to(device) # Predictions for state 2 (next state)
 
             # Get best actions 
             a_2 = torch.argmax(Q_2_preds,dim=1).to(device)
@@ -84,9 +84,6 @@ class DoubleQLearner():
             # Get batch data for training
             states,next_states,actions,rewards,done_bools = self.replay_buffer.sample()
 
-            # Set to training mode
-            self.Q_a_obj.train() # not necessary but good practice when adding batch norm and other layers
-
             # Get target matrix
             targets = self.get_targets(next_states,rewards,done_bools)
 
@@ -103,6 +100,10 @@ class DoubleQLearner():
         
     def train_q_learner(self,actions,batch_data,batch_size,epochs=1):
         try:
+            # Set to training mode
+            self.Q_a_obj.train() # not necessary but good practice when adding batch norm and other layers
+
+            # Load data into DataLoader
             batch_dataloader = DataLoader(batch_data,batch_size=batch_size,num_workers=0)
 
             # Increase count of train steps and perform model training
@@ -123,6 +124,11 @@ class DoubleQLearner():
 
                     # Backpropagation
                     loss.backward()
+
+                    # Clip the gradients
+                    for p in self.Q_a_obj.parameters():
+                        p.grad.data.clamp_(-1,1)
+
                     # loss.backward(retain_graph=True)
                     self.Q_a_obj.optimizer.step()     
 
