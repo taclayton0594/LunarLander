@@ -1,6 +1,7 @@
-gym[box2d]
-box2d
-box2d-py
+# gym[box2d]
+# box2d
+# box2d-py
+gymnasium
 numpy
 pandas
 scikit-learn

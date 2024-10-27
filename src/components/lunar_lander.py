@@ -1,6 +1,7 @@
 import sys
 import numpy as np
-import gym
+# import gym
+import gymnasium as gym
 from torch import nn
 from src.exception import CustomException
 from src.logger import logging
@@ -56,11 +57,10 @@ class LunarLander():
     def CreateEnvironment(self,seed=222980):
         try:
             # initialize environment
-            self.env = gym.make('LunarLander-v2',render_mode="human")
-            self.env.seed(seed)            
+            self.env = gym.make('LunarLander-v3',render_mode="human")         
 
             # get info on environment and seed
-            self.curr_state, _ = self.env.reset(seed=seed, options={})
+            self.curr_state, _ = self.env.reset(seed=seed)
             self.curr_state = np.squeeze(self.curr_state)
 
             logging.info(f"Lunar Lander environment has been created.")
