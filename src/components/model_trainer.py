@@ -12,11 +12,11 @@ from datetime import datetime
 
 class RLModelTrainer:
     def __init__(self):
-        self.LunarLander = LunarLander()
-        self.max_steps = 700
+        self.max_steps = 1000
         self.max_trials = 5000 
         self.experiment_num = 0
         self.trial_num = 0
+        self.LunarLander = LunarLander(max_steps=self.max_steps)
 
     def set_model_hyperparameters(self):
         params = {
@@ -24,7 +24,7 @@ class RLModelTrainer:
             "layer_2_neurons": [32],
             "layer_3_neurons": [0],
             "alpha": [0.0001],
-            "alpha_decay": [0.998],
+            "alpha_decay": [0.994],
             "eps_decay": [0.992], # epsilon will always start at 1
             "buf_size": [100000], 
             "batch_size": [64],
@@ -134,7 +134,7 @@ class RLModelTrainer:
                     a = self.LunarLander.getBestActionEps(Q)
 
                     # Take a step and store relevant information
-                    _, _, _, reward, done = self.LunarLander.EnvironmentStep(a)
+                    _, _, _, reward, done, truncated = self.LunarLander.EnvironmentStep(a)
 
                     # Add reward to current episode total
                     self.LunarLander.reward = self.LunarLander.reward + reward
@@ -146,7 +146,7 @@ class RLModelTrainer:
                         self.LunarLander.DoubleQLearner.train_ANNs()
 
                     # End the episode if the epoch is done or the max number of steps have been taken
-                    if (self.LunarLander.eps_step_count >= self.max_steps) or done:
+                    if (self.LunarLander.eps_step_count >= self.max_steps) or done or truncated:
                         logging.info(f"Trial {j+1}/{self.max_trials} of experiment {i+1}/{self.num_experiments} ended with a reward of: {self.LunarLander.reward}")
                         print(f"The final reward of trial {j+1}/{self.max_trials}: {self.LunarLander.reward}.")  
                         self.rewards[i][j] = self.LunarLander.reward
@@ -175,6 +175,9 @@ class RLModelTrainer:
 
             # Increment experiment number
             self.experiment_num = self.experiment_num + 1
+
+            # Reset seeds
+            self.LunarLander.ReseedAll()
 
             # Log final performance
             logging.info(f"Experiment {i+1}/{self.num_experiments} had final average reward of: {np.sum(self.rewards[i][(self.trial_num-100):self.trial_num-1]) / 100.0}")

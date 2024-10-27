@@ -1,6 +1,7 @@
 import sys
 import numpy as np
-# import gym
+import torch
+import random
 import gymnasium as gym
 from torch import nn
 from src.exception import CustomException
@@ -10,7 +11,7 @@ from src.components.double_q_learner import DoubleQLearner
 class LunarLander():
     def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-6,gamma=1.0,eps=1,eps_decay=0.992,
                  buf_size=2048,min_buf_size=5000,batch_size=32,eps_min=0.01,num_states=8,
-                 num_actions=4):
+                 num_actions=4,max_steps=1000):
         self.alpha = alpha
         self.alpha_init = alpha
         self.alpha_decay = alpha_decay
@@ -28,6 +29,7 @@ class LunarLander():
         self.reward = 0
         self.eps_step_count = 0
         self.tot_step_count = 0
+        self.max_steps = max_steps
         self.env = np.empty((1,),dtype=object)
         self.curr_state = np.zeros((num_states,))
         self.DoubleQLearner = np.empty((1,),dtype=object)
@@ -57,7 +59,7 @@ class LunarLander():
     def CreateEnvironment(self,seed=222980):
         try:
             # initialize environment
-            self.env = gym.make('LunarLander-v3',render_mode="human")         
+            self.env = gym.make('LunarLander-v3',render_mode="human",max_episode_steps=self.max_steps)         
 
             # get info on environment and seed
             self.curr_state, _ = self.env.reset(seed=seed)
@@ -68,6 +70,14 @@ class LunarLander():
         except Exception as e:
             raise CustomException(e,sys)
         
+    def ReseedAll(self,seed=222980):
+        # Reset all seeds at the end of each experiment
+        np.random.seed(0)
+        torch.manual_seed(0)
+        random.seed(0)
+        self.curr_state, _ = self.env.reset(seed=seed)
+
+        
     def ResetEnvironment(self):
         self.curr_state = self.env.reset()
         self.reward = 0
@@ -76,7 +86,7 @@ class LunarLander():
     def EnvironmentStep(self,action):
         try:
             next_state, reward, terminated, truncated, _ = self.env.step(action)
-            done = terminated or truncated
+            done = terminated
 
             # Store new experience
             experience = self.curr_state, next_state, action, reward, done
@@ -87,7 +97,7 @@ class LunarLander():
             self.eps_step_count = self.eps_step_count + 1
             self.tot_step_count = self.tot_step_count + 1
 
-            return experience
+            return experience,truncated
         
         except Exception as e:
             raise CustomException(e,sys)
