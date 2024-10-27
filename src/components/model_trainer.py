@@ -134,7 +134,7 @@ class RLModelTrainer:
                     a = self.LunarLander.getBestActionEps(Q)
 
                     # Take a step and store relevant information
-                    _, _, _, reward, done, truncated = self.LunarLander.EnvironmentStep(a)
+                    (_, _, _, reward, done), truncated = self.LunarLander.EnvironmentStep(a)
 
                     # Add reward to current episode total
                     self.LunarLander.reward = self.LunarLander.reward + reward

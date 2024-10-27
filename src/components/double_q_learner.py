@@ -103,7 +103,7 @@ class DoubleQLearner():
             # Set to training mode
             self.Q_a_obj.train() # not necessary but good practice when adding batch norm and other layers
 
-            # Load data into DataLoader
+            # Load data into custom DataLoader
             batch_dataloader = DataLoader(batch_data,batch_size=batch_size,num_workers=0)
 
             # Increase count of train steps and perform model training
