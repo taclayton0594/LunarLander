@@ -92,6 +92,7 @@ class RLModelTrainer:
         # calculate 100pt moving average of rewards
         if self.trial_num <= 100:
             mov_avg = np.sum(self.rewards[self.experiment_num][-(self.trial_num-1):]) / self.trial_num
+            print(mov_avg)
         else:
             mov_avg = np.sum(self.rewards[self.experiment_num][-100:]) / 100.0
 
@@ -150,6 +151,7 @@ class RLModelTrainer:
                         logging.info(f"Trial {j+1}/{self.max_trials} of experiment {i+1}/{self.num_experiments} ended with a reward of: {self.LunarLander.reward}")
                         print(f"The final reward of trial {j+1}/{self.max_trials}: {self.LunarLander.reward}.")  
                         self.rewards[i][j] = self.LunarLander.reward
+                        print(self.rewards[i][j])
                         break
 
                     # # Update target ANNs if counter hit
