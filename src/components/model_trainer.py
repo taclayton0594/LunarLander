@@ -25,7 +25,7 @@ class RLModelTrainer:
             "layer_3_neurons": [0],
             "alpha": [0.00001],
             "alpha_decay": [1],
-            "eps_decay": [0.999], # epsilon will always start at 1
+            "eps_decay": [0.996], # epsilon will always start at 1
             "buf_size": [100000], 
             "batch_size": [64],
             "target_update_steps": [1],
@@ -42,14 +42,14 @@ class RLModelTrainer:
 
         # Get date string 
         current_datetime = datetime.now()
-        date_object = datetime.strptime(current_datetime, "%d/%m/%Y %H:%M")
+        self.file_date_str = current_datetime.strftime("%d_%m_%Y_%H_%M")
 
         # Save experiment info
-        self.file_date_str = date_object.strftime("%d_%m_%Y_%H_%M")
-        file_name = f'Experiment_{self.file_date_str}'
+        file_name = f'Experiment_Info_{self.file_date_str}'
         file_path = os.path.join("artifacts",file_name)
         obj = (self.grid,self.num_experiments)
         save_object(file_path,obj)
+        logging.info('Experiment hyperparameter tuning grid info has been saved.')
 
     def initialize_Q_Learner(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss):
         self.LunarLander.CreateQLearner(num_layers,neurons)
@@ -105,6 +105,8 @@ class RLModelTrainer:
         obj = self.rewards
         save_object(file_path,obj)
 
+        logging.info(f'Experiment reward info has been saved.')
+
     def start_RL_training(self):
         # Initialize the grid of hyperparameters for each experiment
         self.get_hyperparameter_grid()
@@ -150,12 +152,12 @@ class RLModelTrainer:
                         self.rewards[i][j] = self.LunarLander.reward
                         break
 
-                    # Update target ANNs if counter hit
-                    if ((self.LunarLander.tot_step_count % self.target_update_steps == 0) and
-                        (curr_buf_size >= self.LunarLander.min_buf_size)):
-                        # self.LunarLander.DoubleQLearner.updateTargetANNs()
-                        self.LunarLander.DoubleQLearner.updateTargetANNs(self.LunarLander.DoubleQLearner.Q_a_obj,
-                                                                            self.LunarLander.DoubleQLearner.Q_a_obj_target)
+                    # # Update target ANNs if counter hit
+                    # if ((self.LunarLander.tot_step_count % self.target_update_steps == 0) and
+                    #     (curr_buf_size >= self.LunarLander.min_buf_size)):
+                    #     # self.LunarLander.DoubleQLearner.updateTargetANNs()
+                    #     self.LunarLander.DoubleQLearner.updateTargetANNs(self.LunarLander.DoubleQLearner.Q_a_obj,
+                    #                                                         self.LunarLander.DoubleQLearner.Q_a_obj_target)
 
                 # Update Epsilon
                 if (curr_buf_size >= self.LunarLander.min_buf_size):

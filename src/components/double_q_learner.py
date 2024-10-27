@@ -66,7 +66,7 @@ class DoubleQLearner():
         try:
             # Get the model outputs for each batch sample
             with torch.no_grad(): # save memory usage and time by not saving gradient info
-                Q_2_preds = self.Q_a_obj_target(next_states).to(device) # Predictions for state 2 (next state)
+                Q_2_preds = self.Q_a_obj(next_states).detach().to(device) # Predictions for state 2 (next state)
 
             # Get best actions 
             a_2 = torch.argmax(Q_2_preds,dim=1).to(device)
