@@ -19,7 +19,7 @@ This freezing of target nets allows for more stable training.
 '''
 class DoubleQLearner():
     def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),num_actions=4,buf_size=50000,batch_size=32,
-                 alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99,tau=0.01):
+                 alpha=0.0001,alpha_decay=1.0,alpha_min=1e-6,gamma=0.99,tau=0.001):
         self.Q_a_obj = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min).to(device)
         self.Q_a_obj_target = DoubleQLearnerANN(num_layers,neurons,num_inputs,num_actions,loss,alpha,alpha_decay,alpha_min).to(device)
         self.no_gradient_model() # tell Pytorch not to compute gradients for target model
@@ -125,9 +125,9 @@ class DoubleQLearner():
                     # Backpropagation
                     loss.backward()
 
-                    # Clip the gradients
-                    for p in self.Q_a_obj.parameters():
-                        p.grad.data.clamp_(-1,1)
+                    # # Clip the gradients
+                    # for p in self.Q_a_obj.parameters():
+                    #     p.grad.data.clamp_(-1,1)
 
                     # loss.backward(retain_graph=True)
                     self.Q_a_obj.optimizer.step()     
@@ -140,8 +140,6 @@ class DoubleQLearner():
 
             if (self.Q_a_obj.train_step_count % 5000 == 0):
                 avg_err = self.Q_a_obj.running_loss / self.Q_a_obj.train_step_count / epochs / batch_size
-                print(f"X={preds}")
-                print(f"y={y}")
                 print(f"Average batch error is = {avg_err} on train step #{self.Q_a_obj.train_step_count}.")
 
         except Exception as e:

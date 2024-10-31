@@ -40,7 +40,7 @@ class DoubleQLearnerANN(nn.Module):
             self.lin3 = nn.Linear(neurons[1],neurons[2])
         self.out = nn.Linear(neurons[num_layers-1],num_outputs)
         
-        self.optimizer = torch.optim.Adam(self.parameters(),lr=learn_rate)
+        self.optimizer = torch.optim.RMSprop(self.parameters(),lr=learn_rate)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,step_size=steps_to_update,
                                                             gamma=learn_rate_decay)
         logging.info(f"Neural network initialized.")

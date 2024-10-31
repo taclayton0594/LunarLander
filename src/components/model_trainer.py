@@ -13,23 +13,23 @@ from datetime import datetime
 class RLModelTrainer:
     def __init__(self):
         self.max_steps = 1000
-        self.max_trials = 5000 
+        self.max_trials = 2000 
         self.experiment_num = 0
         self.trial_num = 0
         self.LunarLander = LunarLander(max_steps=self.max_steps)
 
     def set_model_hyperparameters(self):
         params = {
-            "layer_1_neurons": [32],
+            "layer_1_neurons": [64],
             "layer_2_neurons": [32],
             "layer_3_neurons": [0],
             "alpha": [0.0001],
-            "alpha_decay": [0.994],
-            "eps_decay": [0.992], # epsilon will always start at 1
+            "alpha_decay": [1], 
+            "eps_decay": [0.999], # epsilon will always start at 1
             "buf_size": [100000], 
-            "batch_size": [64],
-            "target_update_steps": [1],
-            "batch_update_steps": [1]
+            "batch_size": [128],
+            "target_update_steps": [4],
+            "batch_update_steps": [4]
         }
 
         return params
@@ -75,6 +75,7 @@ class RLModelTrainer:
         self.LunarLander.eps = 1.0
         self.LunarLander.eps_decay = eps_decay
         self.LunarLander.buf_size = buf_size
+        self.LunarLander.min_buf_size = batch_size
         self.LunarLander.batch_size = batch_size
         self.trial_num = 1
         self.LunarLander.tot_step_count = 0 # needed when starting next hyperparamter experiment
@@ -88,7 +89,7 @@ class RLModelTrainer:
         # Create Double Q learner
         self.initialize_Q_Learner(num_layers,neurons)
 
-    def print_performance(self):
+    def print_performance(self,i,j):
         # calculate 100pt moving average of rewards
         if self.trial_num <= 100:
             mov_avg = np.sum(self.rewards[self.experiment_num][0:self.trial_num-1]) / self.trial_num
@@ -97,6 +98,8 @@ class RLModelTrainer:
 
         str_out = f"The 100 trial moving average is {mov_avg} at trial {self.trial_num} of experiment {self.experiment_num+1}."
         print(str_out)
+        print(f"alpha_a = {self.LunarLander.DoubleQLearner.get_lr()}")
+        print(f"epsilon = {self.LunarLander.eps}") 
         logging.info(str_out)
 
     def save_experiment_rewards(self):
@@ -146,9 +149,7 @@ class RLModelTrainer:
                         self.LunarLander.DoubleQLearner.train_ANNs()
 
                     # End the episode if the epoch is done or the max number of steps have been taken
-                    if (self.LunarLander.eps_step_count >= self.max_steps) or done or truncated:
-                        logging.info(f"Trial {j+1}/{self.max_trials} of experiment {i+1}/{self.num_experiments} ended with a reward of: {self.LunarLander.reward}")
-                        print(f"The final reward of trial {j+1}/{self.max_trials}: {self.LunarLander.reward}.")  
+                    if (self.LunarLander.eps_step_count >= self.max_steps) or done or truncated: 
                         self.rewards[i][j] = self.LunarLander.reward
 
                         break
@@ -165,10 +166,7 @@ class RLModelTrainer:
                     self.LunarLander.UpdateEpsilon()  
 
                 if (j+1) % 10 == 0:
-                    print(f"alpha_a = {self.LunarLander.DoubleQLearner.get_lr()}")
-                    print(f"epsilon = {self.LunarLander.eps}") 
-
-                    self.print_performance()
+                    self.print_performance(i,j)
 
                 # Increment trial number
                 self.trial_num = self.trial_num + 1
