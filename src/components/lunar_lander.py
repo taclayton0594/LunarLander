@@ -9,7 +9,7 @@ from src.logger import logging
 from src.components.double_q_learner import DoubleQLearner
 
 class LunarLander():
-    def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-6,gamma=1.0,eps=1,eps_decay=0.992,
+    def __init__(self,alpha=0.01,alpha_decay=0.99,alpha_min=1e-6,gamma=0.99,eps=1,eps_decay=0.992,
                  buf_size=2048,min_buf_size=1000,batch_size=32,eps_min=0.01,num_states=8,
                  num_actions=4,max_steps=1000):
         self.alpha = alpha
@@ -56,7 +56,7 @@ class LunarLander():
 
         return self.DoubleQLearner
 
-    def CreateEnvironment(self,seed=222980):
+    def CreateEnvironment(self,seed=0):
         try:
             # initialize environment
             self.env = gym.make('LunarLander-v3',render_mode="human",max_episode_steps=self.max_steps)         

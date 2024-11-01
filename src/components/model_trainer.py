@@ -23,11 +23,11 @@ class RLModelTrainer:
             "layer_1_neurons": [64],
             "layer_2_neurons": [32],
             "layer_3_neurons": [0],
-            "alpha": [0.0001],
+            "alpha": [0.0001,0.0002,0.0003], #0.00015 sucess 11-1
             "alpha_decay": [1], 
             "eps_decay": [0.999], # epsilon will always start at 1
             "buf_size": [100000], 
-            "batch_size": [128],
+            "batch_size": [64],
             "target_update_steps": [4],
             "batch_update_steps": [4]
         }
@@ -45,7 +45,7 @@ class RLModelTrainer:
         self.file_date_str = current_datetime.strftime("%d_%m_%Y_%H_%M")
 
         # Save experiment info
-        file_name = f'Experiment_Info_{self.file_date_str}'
+        file_name = f'Experiment_Info_{self.file_date_str}.pkl'
         file_path = os.path.join("artifacts",file_name)
         obj = (self.grid,self.num_experiments)
         save_object(file_path,obj)
