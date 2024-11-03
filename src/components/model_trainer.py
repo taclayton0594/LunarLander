@@ -3,7 +3,6 @@ import numpy as np
 from dataclasses import dataclass
 import torch
 from torch import nn
-from src.exception import CustomException
 from src.logger import logging
 from src.utils import save_object,setup_lunar_lander_grid
 from src.components.lunar_lander import LunarLander
@@ -20,10 +19,10 @@ class RLModelTrainer:
 
     def set_model_hyperparameters(self):
         params = {
-            "layer_1_neurons": [64],
-            "layer_2_neurons": [32],
+            "layer_1_neurons": [128,64,32],
+            "layer_2_neurons": [128,64,32],
             "layer_3_neurons": [0],
-            "alpha": [0.0001,0.0002,0.0003], #0.00015 sucess 11-1
+            "alpha": [0.00015], #0.00015 sucess 11-1
             "alpha_decay": [1], 
             "eps_decay": [0.999], # epsilon will always start at 1
             "buf_size": [100000], 

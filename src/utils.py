@@ -3,7 +3,6 @@ import sys
 import numpy as np
 import torch
 import random
-import pandas as pd
 from src.exception import CustomException
 from src.logger import logging
 import dill

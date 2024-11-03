@@ -9,13 +9,10 @@ from src.components.replay_buffer import ReplayBuffer
 from src.components.custom_data import LunarLanderDataset
 from src.components.ann_model import device
 
-# disable backends to prevent maxing RAM usage
-# torch.backends.cudnn.enabled = False
-
 '''
-This main class for the RL Double Q-Learner. On initialization, 4 neural networks will be created, 2 for 2 nets used in double Q
-and then another 2 for target nets for each of the previous nets that will be frozen for a tunable amount of time.
-This freezing of target nets allows for more stable training.
+This main class for the RL Double Q-Learner. On initialization, 2 neural networks will be created, 1 for evaluation and the other
+as a target net that will be frozen for a tunable amount of time. This freezing of target nets allows for more stable training using 
+an off-policy methodology.
 '''
 class DoubleQLearner():
     def __init__(self,num_layers,neurons,num_inputs=8,loss=nn.MSELoss(),num_actions=4,buf_size=50000,batch_size=32,
@@ -25,8 +22,7 @@ class DoubleQLearner():
         self.no_gradient_model() # tell Pytorch not to compute gradients for target model
 
         # initialize weights
-        self.Q_a_obj.apply(self.initialize_weights)
-        # self.updateTargetANNs()
+        self.Q_a_obj.apply(self.initialize_weights)\
         self.Q_a_obj_target.apply(self.initialize_weights)
         
         self.num_actions = num_actions
@@ -98,7 +94,7 @@ class DoubleQLearner():
     def get_lr(self):
         return self.Q_a_obj.optimizer.param_groups[0]['lr']
         
-    def train_q_learner(self,actions,batch_data,batch_size,epochs=1):
+    def train_q_learner(self,actions,batch_data,batch_size,epochs=1,output_step_count=5000,clip_gradients=False):
         try:
             # Set to training mode
             self.Q_a_obj.train() # not necessary but good practice when adding batch norm and other layers
@@ -125,20 +121,21 @@ class DoubleQLearner():
                     # Backpropagation
                     loss.backward()
 
-                    # # Clip the gradients
-                    # for p in self.Q_a_obj.parameters():
-                    #     p.grad.data.clamp_(-1,1)
+                    # Clip the gradients
+                    if clip_gradients:
+                        for p in self.Q_a_obj.parameters():
+                            p.grad.data.clamp_(-1,1)
 
-                    # loss.backward(retain_graph=True)
                     self.Q_a_obj.optimizer.step()     
 
                 if self.get_lr() > self.Q_a_obj.learn_rate_min:
                     self.Q_a_obj.scheduler.step()
 
-            # turn off training mode - not necessary
+            # turn off training mode - not necessary but good practice
+            # Required for batch normalization and other layers with different behavior during training and eval
             self.Q_a_obj.eval()
 
-            if (self.Q_a_obj.train_step_count % 5000 == 0):
+            if (self.Q_a_obj.train_step_count % output_step_count == 0):
                 avg_err = self.Q_a_obj.running_loss / self.Q_a_obj.train_step_count / epochs / batch_size
                 print(f"Average batch error is = {avg_err} on train step #{self.Q_a_obj.train_step_count}.")
 

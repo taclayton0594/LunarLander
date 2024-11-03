@@ -11,14 +11,14 @@ device = (
     if torch.backends.mps.is_available()
     else "cpu"
 )
-# device = "cpu"
 logging.info(f"Using {device} device for neural network training.")
 
 torch.autograd.set_detect_anomaly(True)
 
 '''
 ANN class for double Q learner model. All neural networks will be fully connected, use
-Relu as activation function, and Adam optimizer with definable learning rate. NOTE: all models will have at least 2 layers.
+Relu as activation function, and RMSprop optimizer with definable learning rate. 
+NOTE: all models will have at least 2 layers.
 '''
 class DoubleQLearnerANN(nn.Module):
     def __init__(self,num_layers,neurons,num_inputs=8,num_outputs=4,loss=nn.MSELoss(),learn_rate=0.0001,
