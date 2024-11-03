@@ -22,7 +22,7 @@ class DoubleQLearner():
         self.no_gradient_model() # tell Pytorch not to compute gradients for target model
 
         # initialize weights
-        self.Q_a_obj.apply(self.initialize_weights)\
+        self.Q_a_obj.apply(self.initialize_weights)
         self.Q_a_obj_target.apply(self.initialize_weights)
         
         self.num_actions = num_actions
