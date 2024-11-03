@@ -13,6 +13,7 @@ class RLModelTrainer:
     def __init__(self):
         self.max_steps = 1000
         self.max_trials = 2000 
+        self.print_perf_cnt = 10
         self.experiment_num = 0
         self.trial_num = 0
         self.LunarLander = LunarLander(max_steps=self.max_steps)
@@ -164,7 +165,7 @@ class RLModelTrainer:
                 if (curr_buf_size >= self.LunarLander.min_buf_size):
                     self.LunarLander.UpdateEpsilon()  
 
-                if (j+1) % 10 == 0:
+                if (j+1) % self.print_perf_cnt == 0:
                     self.print_performance(i,j)
 
                 # Increment trial number
