@@ -8,8 +8,12 @@ $$\left( x,y,v_x,v_y,\theta,v_{\theta},leg_L,leg_R \right)$$
 States in respective order:
 - *x-coordinate* 
 - *y-coordinate*
-- *horizontal velocity ($\v_x$)*
-- *vertical velocity ($\v_y$)*
+- *horizontal velocity (
+$\v_x$
+)*
+- *vertical velocity (
+    $\v_y$
+)*
 - *angle of lander with respect to verical access*
 - *angular velocity of the lander*
 - *boolean for if left leg is touching ground*
