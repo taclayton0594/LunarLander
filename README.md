@@ -3,13 +3,12 @@ The problem consists of an 8-dimensional continuous state space and a discrete a
 
 ## States
 At each time step, a tuple of size 8 is given representing the 8 states: 
-$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
-&&\left( x,y,v_x,v_y,\theta,v_{\theta},leg_L,leg_R \right)&&
+$$\left( x,y,v_x,v_y,\theta,v_{\theta},leg_L,leg_R \right)$$
 State in respective order:
 - *x-coordinate* 
 - *y-coordinate*
-- *horizontal velocity ($v_{x}$)*
-- *vertical velocity ($v_{y}$)*
+- *horizontal velocity ($v_x$)*
+- *vertical velocity ($v_y$)*
 - *angle of lander with respect to verical access*
 - *angular velocity of the lander*
 - *boolean for if left leg is touching ground*
