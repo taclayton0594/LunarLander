@@ -70,7 +70,7 @@ class LunarLander():
         except Exception as e:
             raise CustomException(e,sys)
         
-    def ReseedAll(self,seed=222980):
+    def ReseedAll(self,seed=0):
         # Reset all seeds at the end of each experiment
         np.random.seed(0)
         torch.manual_seed(0)
@@ -123,7 +123,4 @@ class LunarLander():
         if eps_new > self.eps_min:
             self.eps = eps_new
         else:
-            self.eps = self.eps_min
-
-            logging.info("Epsilon decay factor has been decremented.")
-        
+            self.eps = self.eps_min        

@@ -20,16 +20,16 @@ class RLModelTrainer:
 
     def set_model_hyperparameters(self):
         params = {
-            "layer_1_neurons": [128,64,32],
-            "layer_2_neurons": [128,64,32],
+            "layer_1_neurons": [64], # 64
+            "layer_2_neurons": [32], #32
             "layer_3_neurons": [0],
             "alpha": [0.00015], #0.00015 sucess 11-1
-            "alpha_decay": [1], 
-            "eps_decay": [0.999], # epsilon will always start at 1
-            "buf_size": [100000], 
-            "batch_size": [64],
-            "target_update_steps": [4],
-            "batch_update_steps": [4]
+            "alpha_decay": [1], # 1
+            "eps_decay": [0.999], # 0.999 
+            "buf_size": [100000], # 100000
+            "batch_size": [64], #64
+            "target_update_steps": [4], # 4
+            "batch_update_steps": [4] # 4
         }
 
         return params
