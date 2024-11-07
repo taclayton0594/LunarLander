@@ -9,10 +9,10 @@ States in respective order:
 - *x-coordinate* 
 - *y-coordinate*
 - *horizontal velocity 
-$$\left v_x \right$$
+$$\left( v_x \right)$$
 *
-- *vertical velocity (
-$$\left v_y \right$$
+- *vertical velocity
+$$\left( v_y \right)$$
 *
 - *angle of lander with respect to verical access*
 - *angular velocity of the lander*
