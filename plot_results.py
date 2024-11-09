@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from src.utils import load_object
+from src.logger import logging
 
 # Define folder location of hyperparameter tuning pickle files
 pickle_data_path = os.path.join(os.getcwd(),"artifacts")
@@ -71,6 +72,7 @@ def plot_results(rew_mat,grid,grid_param,legend_str,title_str,save_plots):
     # Show and save plot if specified
     if save_plots:
         plt.savefig(os.path.join(plots_data_path,grid_param+".png"))
+        logging.info('Image saved.')
     
 def unpack_and_plot(cwd_path,info_file_name,rews_file_name,grid_param,legend_str,title_str,save_plots):
     # Unpack data
@@ -88,6 +90,7 @@ unpack_and_plot(pickle_data_path,ED_info_fn,ED_rews_fn,"eps_decay","Decay Rate =
 unpack_and_plot(pickle_data_path,NC_info_fn,NC_rews_fn,"layer_1_neurons","Neuron Count = ",ttl_str+"Neuron Count",True)
 unpack_and_plot(pickle_data_path,LR_info_fn,LR_rews_fn,"alpha","Learn Rate = ",ttl_str+"Learn Rate",True)
 plt.show()
+logging.info('Displaying plots into individual windows now.')
 
 
 
