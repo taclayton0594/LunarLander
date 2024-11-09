@@ -174,7 +174,7 @@ class RLModelTrainer:
             # Increment experiment number
             self.experiment_num = self.experiment_num + 1
 
-            # Reset seeds
+            # Reset seeds after each hyperparameter tuning experiment
             self.LunarLander.ReseedAll()
 
             # Log final performance
