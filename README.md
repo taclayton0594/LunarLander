@@ -36,17 +36,17 @@ The purpose of the target network is to utilize one function to evaluate the bes
 ## Hyperparameter Tuning and Results
 There are many hyperparameters to tune when using Deep Q-Learning. This can often make it challenging to find a successful solution due to the stochastic environments agents are often placed in, which leads to small changes of key parameters having large impacts on learning.  To show the impact of a few of tuning parameters, I selected a set of parameters that successfully solved the Lunar Lander problem and then changed a single parameter at a time to see the effect. Below are the hyperparameters I used as a reference:
 
-**- Number of neurons in first hidden layer - 64**
-**- Number of neurons in second hidden layer - 32**
-**- Learning rate (alpha) - 0.00015**
-**- Learning rate decay rate - 1 (no decay)**
-**-** 
+- **Number of neurons in first hidden layer - 64**
+- **Number of neurons in second hidden layer - 32**
+- **Learning rate (alpha) - 0.00015**
+- **Learning rate decay rate - 1 (no decay)**
+- 
 **$$\epsilon $$**
-**Decay Rate - 0.999**
-**- Buffer size - 100000**
-**- Batch size - 64**
-**- Target network update steps - 4**
-**- Evaluation network training steps - 4**
+- **Decay Rate - 0.999**
+- **Buffer size - 100000**
+- **Batch size - 64**
+- **Target network update steps - 4**
+- **Evaluation network training steps - 4**
 
 In order to find the best possible set of parameters, I would need to try an exhaustive combination of parameters that would not be feasible given local computing resources. Therefore, these results cannot give definitive conclusions on whether a larger batch size is better for learning for example. It is only meant to demonstrate the importance of dedicating time to hyperparameter tuning. 
 
