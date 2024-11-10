@@ -23,8 +23,7 @@ Reward for moving from the top of the screen to the landing pad and coming to re
 ## RL Agent
 For the reinforcement learning (RL) agent, I went with **Double Q-Learning**, a version of Q-Learning. Being a "model-free" algorithm makes it suitable for solving the Lunar Lander problem. A model-free algorithm does not require additional information about the environment, for example the approximate physics models of firing one of the engines, which can lead to longer learning times, while also reducing the effort needed to estimate the dynamics of a given environment.
 
-The goal of any RL agent is to determine optimal state-action pairs:
-**$$ Q: S x A -> \doubleR $$**
+The goal of any RL agent is to determine optimal state-action pairs: **$$\left(Q: S x A -> \doubleR \right)$$**
 Due to the continuous state space (i.e. infinite state space), Deep Q-Learning employs the use of a neural network to approximate this state-action mapping. There is the potential to utilize methods that discretize the state space to make the state space finite; however, I did not consider these methodologies in my solution. In the future, I hope to continue this work to compare other RL agents such as Deterministic Policy Gradient (DDPG), Proximal Policy Optimization (PPO), & actor-critic algorithms to say a few. 
 
 Below is a screenshot of the Double Q-Learning algorithm. Note the use of a target network in this algorithm, which is the difference between Double Q and simple Deep Q-Learning (DQN - Deep Q Network). 
@@ -38,7 +37,7 @@ There are many hyperparameters to tune when using Deep Q-Learning. This can ofte
 
 - **Number of neurons in first hidden layer - 64**
 - **Number of neurons in second hidden layer - 32**
-- **Learning rate (alpha) - 0.00015**
+- **Learning rate ($$\alpha$$) - 0.00015**
 - **Learning rate decay rate - 1 (no decay)**
 - **$$\epsilon$$ Decay Rate - 0.999**
 - **Buffer size - 100000**
