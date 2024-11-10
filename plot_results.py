@@ -13,7 +13,7 @@ plots_data_path = os.path.join(os.getcwd(),"results_figures")
 
 # Define string array for accessing each file
 hyp_strs = ["First_Success","Eps_Decay","Neuron_Count","Learn_Rate","Batch_Size"]
-num_exp = len(hyp_strs)
+hyp_strs = [str + ".pkl" for str in hyp_strs]
 
 # Misc strings
 info_str = "Experiment_Info_"
@@ -21,18 +21,18 @@ rew_str = "exp_rewards_"
 ttl_str = "Hyperparameter Experiment for "
 
 # File names for saved pickle results 
-FS_info_fn = info_str+hyp_strs[0]+".pkl"
-FS_rews_fn = rew_str+hyp_strs[0]+".pkl"
-ED_info_fn = info_str+hyp_strs[1]+".pkl"
-NC_info_fn = info_str+hyp_strs[2]+".pkl"
-LR_info_fn = info_str+hyp_strs[3]+".pkl"
-BS_info_fn = info_str+hyp_strs[4]+".pkl"
-ED_rews_fn = rew_str+hyp_strs[1]+".pkl"
-NC_rews_fn = rew_str+hyp_strs[2]+".pkl"
-LR_rews_fn = rew_str+hyp_strs[3]+".pkl"
-BS_rews_fn = rew_str+hyp_strs[4]+".pkl"
+FS_info_fn = info_str+hyp_strs[0]
+FS_rews_fn = rew_str+hyp_strs[0]
+ED_info_fn = info_str+hyp_strs[1]
+NC_info_fn = info_str+hyp_strs[2]
+LR_info_fn = info_str+hyp_strs[3]
+BS_info_fn = info_str+hyp_strs[4]
+ED_rews_fn = rew_str+hyp_strs[1]
+NC_rews_fn = rew_str+hyp_strs[2]
+LR_rews_fn = rew_str+hyp_strs[3]
+BS_rews_fn = rew_str+hyp_strs[4]
 
-# Load the first success results separately
+# Load the first success results separately to be used within plotting functions
 fs_grid,_ = load_object(os.path.join(pickle_data_path,FS_info_fn))
 fs_grid = fs_grid[0] # Only one experiment in this file
 fs_rews = load_object(os.path.join(pickle_data_path,FS_rews_fn))
@@ -85,12 +85,13 @@ def unpack_and_plot(cwd_path,info_file_name,rews_file_name,grid_param,legend_str
     return 
 
 # Unpack stored information and plot results
-unpack_and_plot(pickle_data_path,BS_info_fn,BS_rews_fn,"batch_size","Batch Size = ",ttl_str+"Batch Size",True)
-unpack_and_plot(pickle_data_path,ED_info_fn,ED_rews_fn,"eps_decay","Decay Rate = ",ttl_str+"Epsilon Decay Rate",True)
-unpack_and_plot(pickle_data_path,NC_info_fn,NC_rews_fn,"layer_1_neurons","Neuron Count = ",ttl_str+"Neuron Count",True)
-unpack_and_plot(pickle_data_path,LR_info_fn,LR_rews_fn,"alpha","Learn Rate = ",ttl_str+"Learn Rate",True)
-plt.show()
+save_plots = False
+unpack_and_plot(pickle_data_path,BS_info_fn,BS_rews_fn,"batch_size","Batch Size = ",ttl_str+"Batch Size",save_plots)
+unpack_and_plot(pickle_data_path,ED_info_fn,ED_rews_fn,"eps_decay","Decay Rate = ",ttl_str+"Epsilon Decay Rate",save_plots)
+unpack_and_plot(pickle_data_path,NC_info_fn,NC_rews_fn,"layer_1_neurons","Neuron Count = ",ttl_str+"Neuron Count",save_plots)
+unpack_and_plot(pickle_data_path,LR_info_fn,LR_rews_fn,"alpha","Learn Rate = ",ttl_str+"Learn Rate",save_plots)
 logging.info('Displaying plots into individual windows now.')
+plt.show()
 
 
 

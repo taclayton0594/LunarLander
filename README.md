@@ -19,3 +19,9 @@ $$\left( v_y \right)$$
 
 ## Rewards
 Reward for moving from the top of the screen to the landing pad and coming to rest is about 100-140 points. If the lander moves away from the landing pad, it loses reward. If the lander crashes, it receives an additional -100 points. If it comes to rest, it receives an additional +100 points. Each leg with ground contact is +10 points. Firing the main engine is -0.3 points each frame. Firing the side engine is -0.03 points each frame. Solved is 200 points.
+
+## RL Agent
+![Double_Q_Learner](./results_figures/Double_Q_Learning.png)
+
+
+## Hyperparameter Tuning and Results
