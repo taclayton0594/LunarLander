@@ -35,6 +35,7 @@ The purpose of the target network is to utilize one function to evaluate the bes
 
 ## Hyperparameter Tuning and Results
 There are many hyperparameters to tune when using Deep Q-Learning. This can often make it challenging to find a successful solution due to the stochastic environments agents are often placed in, which leads to small changes of key parameters having large impacts on learning.  To show the impact of a few of tuning parameters, I selected a set of parameters that successfully solved the Lunar Lander problem and then changed a single parameter at a time to see the effect. Below are the hyperparameters I used as a reference:
+
 **- Number of neurons in first hidden layer - 64**
 **- Number of neurons in second hidden layer - 32**
 **- Learning rate (alpha) - 0.00015**
@@ -55,6 +56,7 @@ The two images below show the impact when making small steps in the learning rat
     <img src="./results_figures/eps_decay.png" width="49%" />
 </p>
 The epsilon decay rate determines how much exploration the learner performs to obtain the optimal policy. We see with a low decay rate (i.e. reduce the number of random steps faster, less exploration) of 0.99 that the agent's average reward has a steeper slope initially before falling off around 1500 episodes. Again, this is due to the agent getting stuck hovering. Increasing the decay rate value is often the best solution to get around this problem at the cost of additional learning time. 
+<p></p>
 
 The next two plots show the impact of changing the batch size and number of neurons in the first hidden layer. All my networks used 2 hidden layers, but I only changed the size of the first layer to reduce the number of experiments to run. We notice similar behavior to learning rate where a batch size that is too small (8) can learn slower and not reach the goal quickly. However, a batch size that is too large may reduce the impact of singlular data points (i.e. high reward actions like landing) that could cause slower in some cases.
 <p align="center" float="left">
@@ -62,6 +64,7 @@ The next two plots show the impact of changing the batch size and number of neur
     <img src="./results_figures/layer_1_neurons.png" width="49%" />
 </p>
 The image showing the results with different neuron counts seems to show that having more neurons can potentially have a positive impact. However, there is not a large difference between 64 and 128 neurons in this evaluation so more experiments are required. 
+<p></p>
 
 In order to improve the conclusions that could be derived from these results, I would need to do a more exhaustive DOE of hyperparameters to find the best combinations to solve the problem as quickly as possible. I would also need to try different seeds in order to show consistency of the results when considering random noise factors. The main conclusion that can be drawn from these results is that Deep Q-Learning is a powerful tool that can learn complex models with little to no information on the environment and actions that can be taken. Additionally, due to various tuning parameters to be selected, there is a need to spend adequate time experimenting with different combinations of parameters in order to find the best policies. 
 
