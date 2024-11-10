@@ -6,25 +6,26 @@ At each time step, a tuple of size 8 is given representing the 8 states:
 $$\left( x,y,v_x,v_y,\theta,v_{\theta},leg_L,leg_R \right)$$
 
 States in respective order:
-    - *x-coordinate* 
-    - *y-coordinate*
-    - *horizontal velocity* 
-    $$\left( v_x \right)$$
-    - *vertical velocity*
-    $$\left( v_y \right)$$
-    - *angle of lander with respect to verical access*
-    - *angular velocity of the lander*
-    - *boolean for if left leg is touching ground*
-    - *boolean for if right leg is touching ground*
+- *x-coordinate* 
+- *y-coordinate*
+- *horizontal velocity* 
+$$\left( v_x \right)$$
+- *vertical velocity*
+$$\left( v_y \right)$$
+- *angle of lander with respect to verical access*
+- *angular velocity of the lander*
+- *boolean for if left leg is touching ground*
+- *boolean for if right leg is touching ground*
 
 ## Rewards
 Reward for moving from the top of the screen to the landing pad and coming to rest is about 100-140 points. If the lander moves away from the landing pad, it loses reward. If the lander crashes, it receives an additional -100 points. If it comes to rest, it receives an additional +100 points. Each leg with ground contact is +10 points. Firing the main engine is -0.3 points each frame. Firing the side engine is -0.03 points each frame. Solved is 200 points.
 
 ## RL Agent
-<p style="text-align:center;">![Double_Q_Learner](./results_figures/Double_Q_Learning.png)</p>
+![Double_Q_Learner](./results_figures/Double_Q_Learning.png)
+
 
 ## Hyperparameter Tuning and Results
-    ![Learn_Rate](./results_figures/alpha.png)
-    ![Eps_Decay](./results_figures/eps_decay.png)
-    ![Batch_Size](./results_figures/batch_size.png)
-    ![Neuron_Count](./results_figures/layer_1_neurons.png)
+![Learn_Rate](./results_figures/alpha.png)
+![Eps_Decay](./results_figures/eps_decay.png)
+![Batch_Size](./results_figures/batch_size.png)
+![Neuron_Count](./results_figures/layer_1_neurons.png)
