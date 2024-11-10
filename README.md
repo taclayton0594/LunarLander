@@ -41,8 +41,8 @@ There are many hyperparameters to tune when using Deep Q-Learning. This can ofte
 - **Learning rate (alpha) - 0.00015**
 - **Learning rate decay rate - 1 (no decay)**
 - 
-**$$\epsilon $$**
-- **Decay Rate - 0.999**
+**$$\epsilon$$**
+**Decay Rate - 0.999**
 - **Buffer size - 100000**
 - **Batch size - 64**
 - **Target network update steps - 4**
