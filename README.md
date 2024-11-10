@@ -29,7 +29,7 @@ Reward for moving from the top of the screen to the landing pad and coming to re
 ## Hyperparameter Tuning and Results
 <p align="center" float="left">
     <img src="./results_figures/alpha.png" width="100" />
-    <img src="./results_figures/eps_decay.png" width="100 />
+    <img src="./results_figures/eps_decay.png" width="100" />
 </p>
 <p align="center">
     <img src="./results_figures/batch_size.png">
