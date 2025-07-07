@@ -12,7 +12,7 @@ States in respective order:
 $$\left( v_x \right)$$
 - *vertical velocity*
 $$\left( v_y \right)$$
-- *angle of lander with respect to verical access*
+- *angle of lander with respect to vertical axis*
 - *angular velocity of the lander*
 - *boolean for if left leg is touching ground*
 - *boolean for if right leg is touching ground*
